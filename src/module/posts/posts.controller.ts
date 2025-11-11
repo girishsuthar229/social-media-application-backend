@@ -1,0 +1,175 @@
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpStatus,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
+  Query,
+  UploadedFile,
+  UseInterceptors,
+} from '@nestjs/common';
+import { PostsService } from './posts.service';
+import {
+  AccessTypes,
+  IResponse,
+  MimeType,
+  PostsOperation,
+  UserDetails,
+} from 'src/helper';
+import { CurrentUser } from 'src/decorators';
+import { FileValidationInterceptor, ResponseUtil } from 'src/interceptors';
+import { CreatePostDto } from './dto/create-post.dto';
+import { FileValidation } from 'src/decorators/file-validation.decorator';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { CreatePost } from './entity/post.entity';
+import { UpdatePostDto } from './dto/update-post.dto';
+import { QueryPostDto } from './dto/query-post.dto';
+import { SearchResponse } from 'src/helper/interface';
+import {
+  GetAllPostsReponseModel,
+  UserAllPostsResponseModel,
+} from './interface/posts.interface';
+import { UserAllPostsDto } from './dto/user-all-posts.dto';
+
+@Controller('posts')
+export class PostsController {
+  constructor(private postsService: PostsService) {}
+
+  @UseInterceptors(FileInterceptor('post_image'), FileValidationInterceptor)
+  @FileValidation({
+    allowedMimeTypes: [MimeType.PNG, MimeType.JPG, MimeType.JPEG],
+  })
+  @Post('create')
+  async createUser(
+    @UploadedFile() post_image: Express.Multer.File,
+    @Body() createPostDto: CreatePostDto,
+    @CurrentUser() user: UserDetails,
+  ): Promise<IResponse<null>> {
+    const payload = {
+      ...createPostDto,
+      post_image,
+      created_by: user.email,
+    };
+    await this.postsService.createPost(user.id, payload);
+    return ResponseUtil.success(
+      null,
+      PostsOperation.POST_CREATED,
+      HttpStatus.OK,
+    );
+  }
+
+  @Post('/get-all-post')
+  async getAllPosts(
+    @Body() queryDto: QueryPostDto,
+    @CurrentUser() user: UserDetails,
+  ): Promise<IResponse<SearchResponse<GetAllPostsReponseModel>>> {
+    const result = await this.postsService.getAllPosts(queryDto);
+    return ResponseUtil.success(
+      result,
+      PostsOperation.POSTS_FETCHED,
+      HttpStatus.OK,
+    );
+  }
+
+  @Post('/get-user-wise-all-posts')
+  async getUserPosts(
+    @Body() queryDto: UserAllPostsDto,
+    @CurrentUser() user: UserDetails,
+  ): Promise<IResponse<SearchResponse<UserAllPostsResponseModel>>> {
+    const result = await this.postsService.getUserPosts(user.id, queryDto);
+    return ResponseUtil.success(
+      result,
+      PostsOperation.USER_POSTS_FETCHED,
+      HttpStatus.OK,
+    );
+  }
+
+  @Get(':id')
+  async getPostById(
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentUser() user: UserDetails,
+  ): Promise<IResponse<CreatePost>> {
+    const post = await this.postsService.getPostById(id);
+    return ResponseUtil.success(
+      post,
+      PostsOperation.POST_FETCHED,
+      HttpStatus.OK,
+    );
+  }
+
+  @UseInterceptors(FileInterceptor('post_image'), FileValidationInterceptor)
+  @FileValidation({
+    allowedMimeTypes: [MimeType.PNG, MimeType.JPG, MimeType.JPEG],
+  })
+  @Patch(':id')
+  async updatePost(
+    @Param('id', ParseIntPipe) id: number,
+    @UploadedFile() post_image: Express.Multer.File,
+    @Body() updatePostDto: UpdatePostDto,
+    @CurrentUser() user: UserDetails,
+  ): Promise<IResponse<CreatePost>> {
+    const payload = {
+      ...updatePostDto,
+      post_image,
+      updated_by: user.email,
+    };
+    const post = await this.postsService.updatePost(id, user.id, payload);
+    return ResponseUtil.success(
+      post,
+      PostsOperation.POST_UPDATED,
+      HttpStatus.OK,
+    );
+  }
+
+  @Delete(':id')
+  async deletePost(
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentUser() user: UserDetails,
+  ): Promise<IResponse<null>> {
+    await this.postsService.deletePost(id, user.id);
+    return ResponseUtil.success(
+      null,
+      PostsOperation.POST_DELETED,
+      HttpStatus.OK,
+    );
+  }
+
+  @Post(':id/like')
+  async likePost(
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentUser() user: UserDetails,
+  ): Promise<IResponse<CreatePost>> {
+    const post = await this.postsService.likePost(id, user.id);
+    return ResponseUtil.success(post, PostsOperation.POST_LIKED, HttpStatus.OK);
+  }
+
+  @Delete(':id/like')
+  async unlikePost(
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentUser() user: UserDetails,
+  ): Promise<IResponse<CreatePost>> {
+    const post = await this.postsService.unlikePost(id, user.id);
+    return ResponseUtil.success(
+      post,
+      PostsOperation.POST_UNLIKED,
+      HttpStatus.OK,
+    );
+  }
+
+  @Post(':id/share')
+  async sharePost(
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentUser() user: UserDetails,
+  ): Promise<IResponse<CreatePost>> {
+    const post = await this.postsService.sharePost(id);
+    return ResponseUtil.success(
+      post,
+      PostsOperation.POST_SHARED,
+      HttpStatus.OK,
+    );
+  }
+}
