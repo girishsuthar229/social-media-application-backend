@@ -62,6 +62,9 @@ export enum ErrorType {
   InvalidFileType = 'InvalidFileType',
   FileSizeExceeded = 'FileSizeExceeded',
   PostNotToBeCreate = 'PostNotToBeCreate',
+  PostNotFound = 'PostNotFound',
+  AlreadyLikedPost = 'AlreadyLikedPost',
+  AlreadyUnLikedPost = 'AlreadyUnLikedPost',
 }
 
 export enum RolesOperation {
@@ -87,17 +90,6 @@ export enum UsersOperation {
   USER_STATUS_UPDATE = 'USER_STATUS_UPDATE',
   DELETE = 'DELETE',
 }
-export enum UsersOperation {
-  USER_CREATEDs = 'User created successfully',
-  USER_UPDATED = 'User updated successfully',
-  USER_DELETED = 'User deleted successfully',
-  USER_FETCHED = 'User fetched successfully',
-  USERS_FETCHED = 'Users fetched successfully',
-  USERS_SEARCHED = 'Users searched successfully',
-  SUGGESTED_USERS_FETCHED = 'Suggested users fetched successfully',
-  FOLLOWERS_FETCHED = 'Followers fetched successfully',
-  FOLLOWING_FETCHED = 'Following fetched successfully',
-}
 
 export enum LookupDetailsCode {
   ENABLED = 'ENABLED',
@@ -120,5 +112,5 @@ export enum PostsOperation {
   POST_DELETED = 'POST_DELETED',
   POST_SHARED = 'POST_SHARED',
   POST_STATUS_UPDATE = 'POST_STATUS_UPDATE',
-  DELETE = 'DELETE',
+  POST_LIKED_ALL_USERS_FETCHED = 'POST_LIKED_ALL_USERS_FETCHED',
 }

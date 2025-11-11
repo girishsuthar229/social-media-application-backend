@@ -8,18 +8,11 @@ import {
   ParseIntPipe,
   Patch,
   Post,
-  Query,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
 import { PostsService } from './posts.service';
-import {
-  AccessTypes,
-  IResponse,
-  MimeType,
-  PostsOperation,
-  UserDetails,
-} from 'src/helper';
+import { IResponse, MimeType, PostsOperation, UserDetails } from 'src/helper';
 import { CurrentUser } from 'src/decorators';
 import { FileValidationInterceptor, ResponseUtil } from 'src/interceptors';
 import { CreatePostDto } from './dto/create-post.dto';
@@ -67,7 +60,7 @@ export class PostsController {
     @Body() queryDto: QueryPostDto,
     @CurrentUser() user: UserDetails,
   ): Promise<IResponse<SearchResponse<GetAllPostsReponseModel>>> {
-    const result = await this.postsService.getAllPosts(queryDto);
+    const result = await this.postsService.getAllPosts(queryDto, user.id);
     return ResponseUtil.success(
       result,
       PostsOperation.POSTS_FETCHED,
@@ -134,28 +127,6 @@ export class PostsController {
     return ResponseUtil.success(
       null,
       PostsOperation.POST_DELETED,
-      HttpStatus.OK,
-    );
-  }
-
-  @Post(':id/like')
-  async likePost(
-    @Param('id', ParseIntPipe) id: number,
-    @CurrentUser() user: UserDetails,
-  ): Promise<IResponse<CreatePost>> {
-    const post = await this.postsService.likePost(id, user.id);
-    return ResponseUtil.success(post, PostsOperation.POST_LIKED, HttpStatus.OK);
-  }
-
-  @Delete(':id/like')
-  async unlikePost(
-    @Param('id', ParseIntPipe) id: number,
-    @CurrentUser() user: UserDetails,
-  ): Promise<IResponse<CreatePost>> {
-    const post = await this.postsService.unlikePost(id, user.id);
-    return ResponseUtil.success(
-      post,
-      PostsOperation.POST_UNLIKED,
       HttpStatus.OK,
     );
   }

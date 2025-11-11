@@ -24,6 +24,7 @@ export interface GetAllPostsReponseModel {
   user: PostUser;
   created_date: string;
   modified_date: string | null;
+  is_liked: boolean;
 }
 export interface UserAllPostsResponseModel {
   post_id: number;

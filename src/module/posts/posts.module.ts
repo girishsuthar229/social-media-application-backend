@@ -5,6 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { CreatePost } from './entity/post.entity';
 import { JwtModule } from '@nestjs/jwt';
 import { Users } from '../users/entity/user.entity';
+import { LikeUnlikePost } from '../likes/entity/like.entity';
 
 @Module({
   imports: [
@@ -12,7 +13,7 @@ import { Users } from '../users/entity/user.entity';
       secret: process.env.JWT_FORGOT_PASSWORD_SECRET,
       signOptions: { expiresIn: '2h' },
     }),
-    TypeOrmModule.forFeature([CreatePost, Users]),
+    TypeOrmModule.forFeature([CreatePost, Users, LikeUnlikePost]),
   ],
   providers: [PostsService],
   controllers: [PostsController],

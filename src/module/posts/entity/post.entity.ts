@@ -1,5 +1,6 @@
 import { BaseEntity } from 'src/database/entities/base.entity';
 import { Comment } from 'src/module/comments/entity/comment.entity';
+import { LikeUnlikePost } from 'src/module/likes/entity/like.entity';
 import { Users } from 'src/module/users/entity/user.entity';
 import {
   Entity,
@@ -41,4 +42,7 @@ export class CreatePost extends BaseEntity {
 
   @OneToMany(() => Comment, (comment) => comment.post)
   comments: Comment[];
+
+  @OneToMany(() => LikeUnlikePost, (like) => like.post)
+  likes: LikeUnlikePost[];
 }

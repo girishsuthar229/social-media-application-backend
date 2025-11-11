@@ -1,9 +1,21 @@
 import { Module } from '@nestjs/common';
 import { CommentsController } from './comments.controller';
 import { CommentsService } from './comments.service';
+import { JwtModule } from '@nestjs/jwt';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Comment } from './entity/comment.entity';
+import { CreatePost } from '../posts/entity/post.entity';
 
 @Module({
+  imports: [
+    JwtModule.register({
+      secret: process.env.JWT_FORGOT_PASSWORD_SECRET,
+      signOptions: { expiresIn: '2h' },
+    }),
+    TypeOrmModule.forFeature([Comment, CreatePost]),
+  ],
+  providers: [CommentsService],
   controllers: [CommentsController],
-  providers: [CommentsService]
+  exports: [CommentsService],
 })
 export class CommentsModule {}

@@ -66,6 +66,7 @@ export class PostsService {
   }
   async getAllPosts(
     queryDto: QueryPostDto,
+    currentUserId: number,
   ): Promise<SearchResponse<GetAllPostsReponseModel>> {
     const {
       offset,
@@ -77,34 +78,40 @@ export class PostsService {
       .createQueryBuilder('p')
       .leftJoinAndSelect('p.user', 'user')
       .leftJoinAndSelect('p.comments', 'comment')
+      .leftJoinAndSelect('p.likes', 'like')
       .where('p.deleted_date IS NULL');
 
     queryBuilder.addOrderBy(`p.${sortBy}`, sortOrder);
     queryBuilder.take(limit).skip(offset);
     const [posts, total] = await queryBuilder.getManyAndCount();
-    const response: GetAllPostsReponseModel[] = posts.map((post) => ({
-      post_id: post?.id,
-      content: post?.content,
-      image_url: post?.image_url,
-      like_count: post?.like_count,
-      share_count: post?.share_count,
-      comment_count: post?.comment_count,
-      self_comment: post?.comment || '',
-      comments: post?.comments.slice(0, 2).map((comment) => ({
-        id: comment?.id,
-        content: comment?.content,
-        user_id: comment?.user.id,
-        user_name: comment?.user.user_name,
-        created_date: comment?.created_date?.toString() ?? null,
-      })),
-      user: {
-        id: post?.user?.id,
-        user_name: post?.user?.user_name,
-        profile_pic_url: post?.user?.photo_url || '',
-      },
-      created_date: post?.created_date?.toString() ?? null,
-      modified_date: post?.modified_date?.toString() ?? null,
-    }));
+    const response: GetAllPostsReponseModel[] = posts.map((post) => {
+      const isLiked =
+        post.likes?.some((like) => like.user_id === currentUserId) ?? false;
+      return {
+        post_id: post?.id,
+        content: post?.content,
+        image_url: post?.image_url,
+        like_count: post?.like_count,
+        share_count: post?.share_count,
+        comment_count: post?.comment_count,
+        self_comment: post?.comment || '',
+        comments: post?.comments.slice(0, 2).map((comment) => ({
+          id: comment?.id,
+          content: comment?.content,
+          user_id: comment?.user.id,
+          user_name: comment?.user.user_name,
+          created_date: comment?.created_date?.toString() ?? null,
+        })),
+        user: {
+          id: post?.user?.id,
+          user_name: post?.user?.user_name,
+          profile_pic_url: post?.user?.photo_url || '',
+        },
+        created_date: post?.created_date?.toString() ?? null,
+        modified_date: post?.modified_date?.toString() ?? null,
+        is_liked: isLiked,
+      };
+    });
 
     return { count: total, rows: response };
   }
@@ -242,25 +249,6 @@ export class PostsService {
 
     post.deleted_date = new Date();
     await this.postsRepository.save(post);
-  }
-
-  /**
-   * Like a post
-   */
-  async likePost(id: number, user_id: number): Promise<CreatePost> {
-    const post = await this.getPostById(id);
-
-    post.like_count += 1;
-    return this.postsRepository.save(post);
-  }
-
-  async unlikePost(id: number, user_id: number): Promise<CreatePost> {
-    const post = await this.getPostById(id);
-
-    if (post.like_count > 0) {
-      post.like_count -= 1;
-    }
-    return this.postsRepository.save(post);
   }
 
   async sharePost(id: number): Promise<CreatePost> {

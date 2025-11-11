@@ -25,6 +25,17 @@ export const Messages = {
     UserStatusUpdated: 'User Status updated successfully.',
     Deleted: 'User Deleted Successfully.',
   },
+  PostMessages: {
+    Fetched_Post_List: 'Posts list fetched successfully',
+    PostsFetched: 'Posts fetched successfully',
+    PostFetched: 'Post fetched successfully',
+    PostCreated: 'Post created successfully.',
+    PostDeleted: 'Post Deleted Successfully.',
+    PostDetail: 'Post details fetched successfully',
+    PostLike: 'Post liked successfully',
+    PostUnLike: 'Post unliked successfully',
+    PostLikedFetchedAllUsers: 'All user fetched  successfully',
+  },
 };
 export const ErrorMessages: Record<ErrorType, string> = {
   [ErrorType.NotFound]:
@@ -76,4 +87,7 @@ export const ErrorMessages: Record<ErrorType, string> = {
     'File size exceeds the maximum limit of [MAX_SIZE].',
   [ErrorType.PostNotToBeCreate]:
     'The user ID is invalid. Please check your credentials and try again.',
+  [ErrorType.PostNotFound]: 'Post not found.',
+  [ErrorType.AlreadyLikedPost]: 'You already liked this post.',
+  [ErrorType.AlreadyUnLikedPost]: 'You already unliked this post.',
 };

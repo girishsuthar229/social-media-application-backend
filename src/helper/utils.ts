@@ -1,4 +1,4 @@
-import { RolesOperation, UsersOperation } from './enum';
+import { PostsOperation, RolesOperation, UsersOperation } from './enum';
 import { Messages } from './error-msg';
 
 export function sanitizeString(value: string): string {
@@ -48,6 +48,21 @@ export function getMessageByCode(messageKey: string): string {
       return Messages.UserMessages.UserStatusUpdated;
     case UsersOperation.DELETE:
       return Messages.UserMessages.Deleted;
+
+    case PostsOperation.POSTS_FETCHED:
+      return Messages.PostMessages.Fetched_Post_List;
+    case PostsOperation.POST_FETCHED:
+      return Messages.PostMessages.PostFetched;
+    case PostsOperation.USER_POSTS_FETCHED:
+      return Messages.PostMessages.PostsFetched;
+    case PostsOperation.POST_CREATED:
+      return Messages.PostMessages.PostCreated;
+    case PostsOperation.POST_LIKED:
+      return Messages.PostMessages.PostLike;
+    case PostsOperation.POST_UNLIKED:
+      return Messages.PostMessages.PostUnLike;
+    case PostsOperation.POST_LIKED_ALL_USERS_FETCHED:
+      return Messages.PostMessages.PostLikedFetchedAllUsers;
 
     default:
       return Messages.InternalServerError;

@@ -22,8 +22,6 @@ import {
   DecodedTokenPayload,
   UserListResponseModel,
   UserProfileDetailsModel,
-  UserResponseDto,
-  UsersListResponseDto,
 } from './interface/users.interface';
 import { UpdatePasswordDto, VerifyTokenDto } from './dto/user-password.dto';
 import * as bcrypt from 'bcrypt';
