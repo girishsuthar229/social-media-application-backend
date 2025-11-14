@@ -81,8 +81,6 @@ export class LikesService {
     });
   }
 
-  // likes.service.ts
-
   async likePostAllUserList(
     post_id: number,
   ): Promise<LikePostUserListResponseModel[]> {
@@ -96,6 +94,10 @@ export class LikesService {
       user_name: like.user.user_name,
       first_name: like.user?.first_name || '',
       last_name: like.user?.last_name || '',
+      photo_url: like.user?.photo_url || '',
+      bio: like.user?.bio || '',
+      is_following: false,
+      //   is_following: like.user?.is_following || '',
     }));
 
     return result;

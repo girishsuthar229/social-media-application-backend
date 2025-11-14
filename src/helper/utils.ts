@@ -63,6 +63,8 @@ export function getMessageByCode(messageKey: string): string {
       return Messages.PostMessages.PostUnLike;
     case PostsOperation.POST_LIKED_ALL_USERS_FETCHED:
       return Messages.PostMessages.PostLikedFetchedAllUsers;
+    case PostsOperation.COMMENT_ALL_USERS_FETCHED:
+      return Messages.PostMessages.PostLikedFetchedAllUsers;
 
     default:
       return Messages.InternalServerError;

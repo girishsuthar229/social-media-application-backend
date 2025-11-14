@@ -8,6 +8,12 @@ export class Comment extends BaseEntity {
   @Column('text')
   content: string;
 
+  @Column('int')
+  user_id: number;
+
+  @Column('int')
+  post_id: number;
+
   @ManyToOne(() => CreatePost, (post) => post.comments)
   @JoinColumn({ name: 'post_id' })
   post: CreatePost;
