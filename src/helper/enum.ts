@@ -65,6 +65,8 @@ export enum ErrorType {
   PostNotFound = 'PostNotFound',
   AlreadyLikedPost = 'AlreadyLikedPost',
   AlreadyUnLikedPost = 'AlreadyUnLikedPost',
+  CommentNotFound = 'CommentNotFound',
+  CommentNotAuthorized = 'CommentNotAuthorized',
 }
 
 export enum RolesOperation {
@@ -115,4 +117,5 @@ export enum PostsOperation {
   POST_LIKED_ALL_USERS_FETCHED = 'POST_LIKED_ALL_USERS_FETCHED',
   COMMENT_ALL_USERS_FETCHED = 'COMMENT_ALL_USERS_FETCHED',
   COMMENT_USER_ON_POST = 'COMMENT_USER_ON_POST',
+  COMMENT_DELETE_ON_POST = 'COMMENT_DELETE_ON_POST',
 }

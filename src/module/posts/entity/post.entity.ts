@@ -35,7 +35,7 @@ export class CreatePost extends BaseEntity {
   deleted_date: Date;
 
   @Column('text', { nullable: true })
-  comment: string;
+  self_comment: string;
 
   @Column('int', { default: 0 })
   comment_count: number;

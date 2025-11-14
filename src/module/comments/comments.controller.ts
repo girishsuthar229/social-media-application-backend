@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpStatus,
   Param,
@@ -28,20 +29,40 @@ export class CommentsController {
       HttpStatus.OK,
     );
   }
+
   @Post(':postId/user-comment')
   async userCommentPost(
     @Param('postId', ParseIntPipe) postId: number,
     @CurrentUser() user: UserDetails,
     @Body() commentOnPostDto: { comment: string },
-  ): Promise<IResponse<null>> {
+  ): Promise<IResponse<CommentsPostUserListResponseModel>> {
     const commentPaylodValue: CommentOnPostDto = {
       user_id: user.id,
       comment: commentOnPostDto.comment,
     };
-    await this.commentsService.userCommentPost(postId, commentPaylodValue);
+    const data = await this.commentsService.userCommentPost(
+      postId,
+      commentPaylodValue,
+    );
+    return ResponseUtil.success(
+      data,
+      PostsOperation.COMMENT_USER_ON_POST,
+      HttpStatus.OK,
+    );
+  }
+
+  @Delete(':commentId')
+  async deletePostComment(
+    @Param('commentId', ParseIntPipe) commentId: number,
+    @CurrentUser() user: UserDetails,
+  ): Promise<IResponse<null>> {
+    const data = await this.commentsService.deletePostComment(
+      commentId,
+      user.id,
+    );
     return ResponseUtil.success(
       null,
-      PostsOperation.POST_UNLIKED,
+      PostsOperation.COMMENT_USER_ON_POST,
       HttpStatus.OK,
     );
   }

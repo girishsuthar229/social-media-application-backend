@@ -59,7 +59,7 @@ export class PostsService {
       like_count: like_count || 0,
       share_count: share_count || 0,
       user: { id: userId },
-      comment: comment || '',
+      self_comment: comment || '',
     });
 
     return this.postsRepository.save(newPost);
@@ -78,15 +78,13 @@ export class PostsService {
       .createQueryBuilder('p')
       .leftJoinAndSelect('p.user', 'user')
       .leftJoinAndSelect('p.comments', 'comment')
+      .leftJoinAndSelect('comment.user', 'commentUser')
       .leftJoinAndSelect('p.likes', 'like')
       .where('p.deleted_date IS NULL');
-
     queryBuilder.addOrderBy(`p.${sortBy}`, sortOrder);
     queryBuilder.take(limit).skip(offset);
     const [posts, total] = await queryBuilder.getManyAndCount();
     const response: GetAllPostsReponseModel[] = posts.map((post) => {
-      const isLiked =
-        post.likes?.some((like) => like.user_id === currentUserId) ?? false;
       return {
         post_id: post?.id,
         content: post?.content,
@@ -94,8 +92,8 @@ export class PostsService {
         like_count: post?.like_count,
         share_count: post?.share_count,
         comment_count: post?.comment_count,
-        self_comment: post?.comment || '',
-        comments: post?.comments.slice(0, 2).map((comment) => ({
+        self_comment: post?.self_comment || '',
+        comments: post?.comments?.slice(0, 2).map((comment) => ({
           id: comment?.id,
           content: comment?.content,
           user_id: comment?.user.id,
@@ -109,7 +107,8 @@ export class PostsService {
         },
         created_date: post?.created_date?.toString() ?? null,
         modified_date: post?.modified_date?.toString() ?? null,
-        is_liked: isLiked,
+        is_liked:
+          post.likes?.some((like) => like.user_id === currentUserId) ?? false,
       };
     });
 
@@ -163,7 +162,7 @@ export class PostsService {
       like_count: post?.like_count,
       share_count: post?.share_count,
       comment_count: post?.comment_count,
-      self_comment: post?.comment || '',
+      self_comment: post?.self_comment || '',
       is_following: true,
       // is_following: isFollowing || false,
     }));
@@ -206,7 +205,7 @@ export class PostsService {
       post.content = content;
     }
     if (comment !== undefined) {
-      post.comment = comment;
+      post.self_comment = comment;
     }
 
     // Handle image update

@@ -65,6 +65,10 @@ export function getMessageByCode(messageKey: string): string {
       return Messages.PostMessages.PostLikedFetchedAllUsers;
     case PostsOperation.COMMENT_ALL_USERS_FETCHED:
       return Messages.PostMessages.PostLikedFetchedAllUsers;
+    case PostsOperation.COMMENT_USER_ON_POST:
+      return Messages.PostMessages.createCommonetOnPost;
+    case PostsOperation.COMMENT_DELETE_ON_POST:
+      return Messages.PostMessages.deleteCommonetOnPost;
 
     default:
       return Messages.InternalServerError;

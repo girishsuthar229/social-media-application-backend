@@ -35,6 +35,8 @@ export const Messages = {
     PostLike: 'Post liked successfully',
     PostUnLike: 'Post unliked successfully',
     PostLikedFetchedAllUsers: 'All user fetched  successfully',
+    createCommonetOnPost: 'Comment create successfully.',
+    deleteCommonetOnPost: 'Comment Deleted Successfully.',
   },
 };
 export const ErrorMessages: Record<ErrorType, string> = {
@@ -90,4 +92,7 @@ export const ErrorMessages: Record<ErrorType, string> = {
   [ErrorType.PostNotFound]: 'Post not found.',
   [ErrorType.AlreadyLikedPost]: 'You already liked this post.',
   [ErrorType.AlreadyUnLikedPost]: 'You already unliked this post.',
+  [ErrorType.CommentNotFound]: 'Comment not found.',
+  [ErrorType.CommentNotAuthorized]:
+    'You are not authorized to delete this comment. Only the comment author or post owner can delete it.',
 };

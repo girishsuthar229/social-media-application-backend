@@ -15,7 +15,7 @@ export class LikeUnlikePost extends BaseEntity {
   @JoinColumn({ name: 'user_id' })
   user: Users;
 
-  @ManyToOne(() => CreatePost, (post) => post.comments)
+  @ManyToOne(() => CreatePost, (post) => post.likes)
   @JoinColumn({ name: 'post_id' })
   post: CreatePost;
 }
