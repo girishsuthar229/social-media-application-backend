@@ -38,6 +38,10 @@ export const Messages = {
     createCommonetOnPost: 'Comment create successfully.',
     deleteCommonetOnPost: 'Comment Deleted Successfully.',
   },
+  FollowMessage: {
+    follow: 'User follow successfully',
+    unfollow: 'User unfollow successfully',
+  },
 };
 export const ErrorMessages: Record<ErrorType, string> = {
   [ErrorType.NotFound]:
@@ -90,9 +94,14 @@ export const ErrorMessages: Record<ErrorType, string> = {
   [ErrorType.PostNotToBeCreate]:
     'The user ID is invalid. Please check your credentials and try again.',
   [ErrorType.PostNotFound]: 'Post not found.',
+  [ErrorType.PostNotAuthorized]: 'You can only delete your own posts.',
   [ErrorType.AlreadyLikedPost]: 'You already liked this post.',
   [ErrorType.AlreadyUnLikedPost]: 'You already unliked this post.',
   [ErrorType.CommentNotFound]: 'Comment not found.',
   [ErrorType.CommentNotAuthorized]:
     'You are not authorized to delete this comment. Only the comment author or post owner can delete it.',
+  [ErrorType.AlreadyFollowUser]: 'You already following this user.',
+  [ErrorType.AlreadyUnFollowUser]: 'You already un following this user.',
+  [ErrorType.FollowNotAuthorized]:
+    'You are not authorized to yourself follow-unfollow',
 };

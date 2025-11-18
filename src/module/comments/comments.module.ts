@@ -5,6 +5,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Comment } from './entity/comment.entity';
 import { CreatePost } from '../posts/entity/post.entity';
+import { Users } from '../users/entity/user.entity';
 
 @Module({
   imports: [
@@ -12,7 +13,7 @@ import { CreatePost } from '../posts/entity/post.entity';
       secret: process.env.JWT_FORGOT_PASSWORD_SECRET,
       signOptions: { expiresIn: '2h' },
     }),
-    TypeOrmModule.forFeature([Comment, CreatePost]),
+    TypeOrmModule.forFeature([Comment, CreatePost, Users]),
   ],
   providers: [CommentsService],
   controllers: [CommentsController],

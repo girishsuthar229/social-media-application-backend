@@ -80,7 +80,16 @@ export class PostsService {
       .leftJoinAndSelect('p.comments', 'comment')
       .leftJoinAndSelect('comment.user', 'commentUser')
       .leftJoinAndSelect('p.likes', 'like')
-      .where('p.deleted_date IS NULL');
+      .leftJoinAndSelect('user.followers', 'followers')
+      .where('p.deleted_date IS NULL')
+      .andWhere(`
+        (
+          user.is_private = false
+          OR user.id = :currentUserId
+          OR followers.follower_id = :currentUserId
+        )
+      `, { currentUserId });
+  
     queryBuilder.addOrderBy(`p.${sortBy}`, sortOrder);
     queryBuilder.take(limit).skip(offset);
     const [posts, total] = await queryBuilder.getManyAndCount();
@@ -241,9 +250,11 @@ export class PostsService {
   async deletePost(id: number, user_id: number): Promise<void> {
     const post = await this.getPostById(id);
 
-    // Check if user owns the post
     if (post.user.id !== user_id) {
-      throw new ForbiddenException('You can only delete your own posts');
+      throw new ForbiddenException({
+        error: ErrorType.PostNotAuthorized,
+        message: ErrorMessages[ErrorType.PostNotAuthorized],
+      });
     }
 
     post.deleted_date = new Date();

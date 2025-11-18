@@ -83,12 +83,16 @@ export class LikesService {
 
   async likePostAllUserList(
     post_id: number,
+    currentUserId: number,
   ): Promise<LikePostUserListResponseModel[]> {
-    const likedUsers = await this.likesRepository.find({
-      where: { post_id },
-      relations: ['user'],
-    });
+    const queryBuilder = this.likesRepository
+      .createQueryBuilder('l')
+      .leftJoinAndSelect('l.user', 'user')
+      .leftJoinAndSelect('user.followers', 'followers')
+      .where('l.post_id = :post_id', { post_id })
+      .andWhere('user.deleted_date IS NULL');
 
+    const [likedUsers] = await queryBuilder.getManyAndCount();
     const result: LikePostUserListResponseModel[] = likedUsers.map((like) => ({
       id: like.user.id,
       user_name: like.user.user_name,
@@ -96,8 +100,11 @@ export class LikesService {
       last_name: like.user?.last_name || '',
       photo_url: like.user?.photo_url || '',
       bio: like.user?.bio || '',
-      is_following: false,
-      //   is_following: like.user?.is_following || '',
+      is_following:
+        like?.user.followers?.some(
+          (f) =>
+            f.follower_id === currentUserId && f.following_id === like?.user.id,
+        ) ?? false,
     }));
 
     return result;

@@ -63,10 +63,14 @@ export enum ErrorType {
   FileSizeExceeded = 'FileSizeExceeded',
   PostNotToBeCreate = 'PostNotToBeCreate',
   PostNotFound = 'PostNotFound',
+  PostNotAuthorized = 'PostNotAuthorized',
   AlreadyLikedPost = 'AlreadyLikedPost',
   AlreadyUnLikedPost = 'AlreadyUnLikedPost',
   CommentNotFound = 'CommentNotFound',
   CommentNotAuthorized = 'CommentNotAuthorized',
+  AlreadyFollowUser = 'AlreadyFollowUser',
+  AlreadyUnFollowUser = 'AlreadyUnFollowUser',
+  FollowNotAuthorized = 'FollowNotAuthorized',
 }
 
 export enum RolesOperation {
@@ -118,4 +122,8 @@ export enum PostsOperation {
   COMMENT_ALL_USERS_FETCHED = 'COMMENT_ALL_USERS_FETCHED',
   COMMENT_USER_ON_POST = 'COMMENT_USER_ON_POST',
   COMMENT_DELETE_ON_POST = 'COMMENT_DELETE_ON_POST',
+}
+export enum FollowOperation {
+  USER_FOLLOW = 'USER_FOLLOW',
+  USER_UN_FOLLOW = 'USER_UN_FOLLOW',
 }

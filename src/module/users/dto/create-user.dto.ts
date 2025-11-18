@@ -8,6 +8,7 @@ import {
   MaxLength,
   IsDefined,
   Validate,
+  IsOptional,
 } from 'class-validator';
 import {
   IsDateNotInFuture,
@@ -36,7 +37,7 @@ export class CreateUserDto {
   password: string;
 
   @Type(() => Number)
-  @IsDefined()
+  @IsOptional()
   role_id?: number;
 
   @Trim()

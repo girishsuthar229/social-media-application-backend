@@ -16,7 +16,7 @@ import { LikePostUserListResponseModel } from './interface/likes.interface';
 export class LikesController {
   constructor(private likesService: LikesService) {}
 
-  @Post(':postId/like')
+  @Get(':postId/like')
   async likePost(
     @Param('postId', ParseIntPipe) postId: number,
     @CurrentUser() user: UserDetails,
@@ -25,7 +25,7 @@ export class LikesController {
     return ResponseUtil.success(null, PostsOperation.POST_LIKED, HttpStatus.OK);
   }
 
-  @Post(':postId/un-like')
+  @Get(':postId/un-like')
   async unlikePost(
     @Param('postId', ParseIntPipe) postId: number,
     @CurrentUser() user: UserDetails,
@@ -41,8 +41,9 @@ export class LikesController {
   @Get(':postId/all-users-list')
   async likePostAllUserList(
     @Param('postId', ParseIntPipe) postId: number,
+    @CurrentUser() user: UserDetails,
   ): Promise<IResponse<LikePostUserListResponseModel[]>> {
-    const data = await this.likesService.likePostAllUserList(postId);
+    const data = await this.likesService.likePostAllUserList(postId, user?.id);
     return ResponseUtil.success(
       data,
       PostsOperation.POST_LIKED_ALL_USERS_FETCHED,

@@ -21,8 +21,12 @@ export class CommentsController {
   @Get(':postId/all-users-list')
   async likePostAllUserList(
     @Param('postId', ParseIntPipe) postId: number,
+    @CurrentUser() user: UserDetails,
   ): Promise<IResponse<CommentsPostUserListResponseModel[]>> {
-    const data = await this.commentsService.commentsPostAllUserList(postId);
+    const data = await this.commentsService.commentsPostAllUserList(
+      postId,
+      user?.id,
+    );
     return ResponseUtil.success(
       data,
       PostsOperation.COMMENT_ALL_USERS_FETCHED,
@@ -62,7 +66,7 @@ export class CommentsController {
     );
     return ResponseUtil.success(
       null,
-      PostsOperation.COMMENT_USER_ON_POST,
+      PostsOperation.COMMENT_DELETE_ON_POST,
       HttpStatus.OK,
     );
   }

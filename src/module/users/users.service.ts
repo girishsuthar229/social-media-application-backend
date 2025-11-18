@@ -77,7 +77,7 @@ export class UsersService {
       password_hash: hashedPassword,
       birth_date: birth_date ? new Date(birth_date) : undefined,
       created_date: getDateAndTime(),
-      role_id: role_id || 2,
+      role_id: role_id ? role_id : 2,
     });
 
     await this.usersRepository.save(user);
@@ -475,6 +475,7 @@ export class UsersService {
 
   async getAllUsers(
     queryDto: GetAllUsersDto,
+    currentUserId: number,
   ): Promise<SearchResponse<UserListResponseModel>> {
     const {
       offset,
@@ -488,6 +489,7 @@ export class UsersService {
 
     const queryBuilder = this.usersRepository
       .createQueryBuilder('u')
+      .leftJoinAndSelect('u.followers', 'followers')
       .where('u.deleted_date IS NULL');
 
     // Apply search filter if search term exists
@@ -526,6 +528,14 @@ export class UsersService {
       birth_date: user.birth_date?.toString() ?? null,
       address: user.address ?? '',
       is_private: user.is_private,
+      is_following:
+        user.followers?.some(
+          (f) => f.follower_id === currentUserId && f.following_id === user.id,
+        ) ?? false,
+      follower_count: user.followers.filter((f) => f.following_id === user.id)
+        .length,
+      following_count: user.followers.filter((f) => f.follower_id === user.id)
+        .length,
       role_id: user.role_id,
       created_date: user.created_date.toString(),
       modified_date: user.modified_date?.toString() ?? null,
@@ -533,205 +543,4 @@ export class UsersService {
 
     return { count: total, rows };
   }
-
-  // /**
-  //  * Get user by ID
-  //  */
-  // async getUserById(id: number): Promise<UserResponseDto> {
-  //   const user = await this.usersRepository.findOne({
-  //     where: { id, deleted_at: IsNull() },
-  //   });
-
-  //   if (!user) {
-  //     throw new NotFoundException('User not found');
-  //   }
-
-  //   return new UserResponseDto({
-  //     id: user.id,
-  //     user_name: user.user_name,
-  //     first_name: user.first_name,
-  //     last_name: user.last_name,
-  //     email: user.email,
-  //     bio: user.bio,
-  //     mobile_number: user.mobile_number,
-  //     photo_url: user.photo_url,
-  //     birth_date: user.birth_date,
-  //     address: user.address,
-  //     is_private: user.is_private,
-  //     role_id: user.role_id,
-  //     created_at: user.created_at,
-  //     updated_at: user.updated_at,
-  //   });
-  // }
-
-  // /**
-  //  * Search users by query
-  //  */
-  // async searchUsers(
-  //   query: string,
-  //   queryDto: QueryUserDto,
-  // ): Promise<UsersListResponseDto> {
-  //   const { page = 1, limit = 10 } = queryDto;
-  //   const skip = (page - 1) * limit;
-
-  //   const [users, total] = await this.usersRepository.findAndCount({
-  //     where: [
-  //       { user_name: Like(`%${query}%`), deleted_at: IsNull() },
-  //       { first_name: Like(`%${query}%`), deleted_at: IsNull() },
-  //       { last_name: Like(`%${query}%`), deleted_at: IsNull() },
-  //       { email: Like(`%${query}%`), deleted_at: IsNull() },
-  //     ],
-  //     order: { created_at: 'DESC' },
-  //     skip,
-  //     take: limit,
-  //   });
-
-  //   const userDtos = users.map(
-  //     (user) =>
-  //       new UserResponseDto({
-  //         id: user.id,
-  //         user_name: user.user_name,
-  //         first_name: user.first_name,
-  //         last_name: user.last_name,
-  //         email: user.email,
-  //         bio: user.bio,
-  //         mobile_number: user.mobile_number,
-  //         photo_url: user.photo_url,
-  //         birth_date: user.birth_date,
-  //         address: user.address,
-  //         is_private: user.is_private,
-  //         role_id: user.role_id,
-  //         created_at: user.created_at,
-  //         updated_at: user.updated_at,
-  //       }),
-  //   );
-
-  //   return new UsersListResponseDto(userDtos, total, page, limit);
-  // }
-
-  // /**
-  //  * Get suggested users (users not followed by current user)
-  //  */
-  // async getSuggestedUsers(
-  //   currentUserId: number,
-  //   limit: number = 10,
-  // ): Promise<UserResponseDto[]> {
-  //   const users = await this.usersRepository
-  //     .createQueryBuilder('user')
-  //     .where('user.id != :currentUserId', { currentUserId })
-  //     .andWhere('user.deleted_at IS NULL')
-  //     .andWhere('user.is_private = :isPrivate', { isPrivate: false })
-  //     .orderBy('RAND()') // Random order for variety
-  //     .limit(limit)
-  //     .getMany();
-
-  //   return users.map(
-  //     (user) =>
-  //       new UserResponseDto({
-  //         id: user.id,
-  //         user_name: user.user_name,
-  //         first_name: user.first_name,
-  //         last_name: user.last_name,
-  //         email: user.email,
-  //         bio: user.bio,
-  //         mobile_number: user.mobile_number,
-  //         photo_url: user.photo_url,
-  //         birth_date: user.birth_date,
-  //         address: user.address,
-  //         is_private: user.is_private,
-  //         role_id: user.role_id,
-  //         created_at: user.created_at,
-  //         updated_at: user.updated_at,
-  //       }),
-  //   );
-  // }
-
-  // /**
-  //  * Get user's followers
-  //  * Note: Requires a followers/following relationship table
-  //  */
-  // async getUserFollowers(
-  //   userId: number,
-  //   queryDto: QueryUserDto,
-  // ): Promise<UsersListResponseDto> {
-  //   const { page = 1, limit = 10 } = queryDto;
-  //   const skip = (page - 1) * limit;
-
-  //   // This assumes you have a followers table
-  //   // Adjust based on your actual relationship structure
-  //   const queryBuilder = this.usersRepository
-  //     .createQueryBuilder('user')
-  //     .innerJoin('followers', 'f', 'f.follower_id = user.id')
-  //     .where('f.following_id = :userId', { userId })
-  //     .andWhere('user.deleted_at IS NULL')
-  //     .skip(skip)
-  //     .take(limit);
-
-  //   const [users, total] = await queryBuilder.getManyAndCount();
-
-  //   const userDtos = users.map(
-  //     (user) =>
-  //       new UserResponseDto({
-  //         id: user.id,
-  //         user_name: user.user_name,
-  //         first_name: user.first_name,
-  //         last_name: user.last_name,
-  //         email: user.email,
-  //         bio: user.bio,
-  //         mobile_number: user.mobile_number,
-  //         photo_url: user.photo_url,
-  //         birth_date: user.birth_date,
-  //         address: user.address,
-  //         is_private: user.is_private,
-  //         role_id: user.role_id,
-  //         created_at: user.created_at,
-  //         updated_at: user.updated_at,
-  //       }),
-  //   );
-
-  //   return new UsersListResponseDto(userDtos, total, page, limit);
-  // }
-
-  // /**
-  //  * Get user's following
-  //  */
-  // async getUserFollowing(
-  //   userId: number,
-  //   queryDto: QueryUserDto,
-  // ): Promise<UsersListResponseDto> {
-  //   const { page = 1, limit = 10 } = queryDto;
-  //   const skip = (page - 1) * limit;
-
-  //   const queryBuilder = this.usersRepository
-  //     .createQueryBuilder('user')
-  //     .innerJoin('followers', 'f', 'f.following_id = user.id')
-  //     .where('f.follower_id = :userId', { userId })
-  //     .andWhere('user.deleted_at IS NULL')
-  //     .skip(skip)
-  //     .take(limit);
-
-  //   const [users, total] = await queryBuilder.getManyAndCount();
-
-  //   const userDtos = users.map(
-  //     (user) =>
-  //       new UserResponseDto({
-  //         id: user.id,
-  //         user_name: user.user_name,
-  //         first_name: user.first_name,
-  //         last_name: user.last_name,
-  //         email: user.email,
-  //         bio: user.bio,
-  //         mobile_number: user.mobile_number,
-  //         photo_url: user.photo_url,
-  //         birth_date: user.birth_date,
-  //         address: user.address,
-  //         is_private: user.is_private,
-  //         role_id: user.role_id,
-  //         created_at: user.created_at,
-  //         updated_at: user.updated_at,
-  //       }),
-  //   );
-
-  //   return new UsersListResponseDto(userDtos, total, page, limit);
-  // }
 }

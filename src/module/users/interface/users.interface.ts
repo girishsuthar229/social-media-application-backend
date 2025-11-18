@@ -20,6 +20,9 @@ export interface UserProfileDetailsModel {
     id: number;
     name: string;
   };
+  follower_count: number;
+  following_count: number;
+  post_count: number;
 }
 
 export class UserListResponseModel {
@@ -34,8 +37,10 @@ export class UserListResponseModel {
   birth_date: string | null;
   address: string;
   is_private: boolean;
+  is_following: boolean;
+  follower_count: number;
+  following_count: number;
   role_id: number;
   created_date: string;
   modified_date: string | null;
 }
-

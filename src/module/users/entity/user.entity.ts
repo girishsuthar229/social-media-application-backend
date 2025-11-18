@@ -1,6 +1,7 @@
 import { BaseEntity } from 'src/database/entities/base.entity';
-import { Entity, Column, JoinColumn, ManyToOne } from 'typeorm';
+import { Entity, Column, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { Roles } from '../../roles/entity/role.entity';
+import { Follows } from 'src/module/follows/entity/follow.entity';
 
 @Entity('users')
 export class Users extends BaseEntity {
@@ -67,4 +68,10 @@ export class Users extends BaseEntity {
 
   @Column({ type: 'boolean', default: false })
   is_private: boolean;
+
+  @OneToMany(() => Follows, (follow) => follow.follower)
+  following: Follows[];
+
+  @OneToMany(() => Follows, (follow) => follow.following)
+  followers: Follows[];
 }

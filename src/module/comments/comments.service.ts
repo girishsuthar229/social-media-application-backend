@@ -19,6 +19,8 @@ export class CommentsService {
     private postsRepository: Repository<CreatePost>,
     @InjectRepository(Comment)
     private readonly commentsRepository: Repository<Comment>,
+    @InjectRepository(Users)
+    private readonly usersRepository: Repository<Users>,
   ) {}
 
   async getPostById(id: number): Promise<CreatePost> {
@@ -36,14 +38,33 @@ export class CommentsService {
 
     return post;
   }
-  async commentsPostAllUserList(
-    post_id: number,
-  ): Promise<CommentsPostUserListResponseModel[]> {
-    const commentUsers = await this.commentsRepository.find({
-      where: { post_id, deleted_date: IsNull() },
-      relations: ['user'],
+  async getUserById(id: number): Promise<Users> {
+    const user = await this.usersRepository.findOne({
+      where: { id },
     });
 
+    if (!user) {
+      throw new NotFoundException({
+        error: ErrorType.UserNotFound,
+        message: ErrorMessages[ErrorType.UserNotFound],
+      });
+    }
+
+    return user;
+  }
+
+  async commentsPostAllUserList(
+    post_id: number,
+    currentUserId: number,
+  ): Promise<CommentsPostUserListResponseModel[]> {
+    const queryBuilder = this.commentsRepository
+      .createQueryBuilder('c')
+      .leftJoinAndSelect('c.user', 'user')
+      .leftJoinAndSelect('user.followers', 'followers')
+      .where('c.post_id = :post_id', { post_id })
+      .andWhere('user.deleted_date IS NULL');
+
+    const [commentUsers] = await queryBuilder.getManyAndCount();
     const result: CommentsPostUserListResponseModel[] = commentUsers.map(
       (comment) => ({
         id: comment.id,
@@ -56,8 +77,12 @@ export class CommentsService {
           last_name: comment.user?.last_name || '',
           photo_url: comment.user?.photo_url || '',
           bio: comment.user?.bio || '',
-          is_following: false,
-          //   is_following: comment.user?.is_following || '',
+          is_following:
+            comment?.user.followers?.some(
+              (f) =>
+                f.follower_id === currentUserId &&
+                f.following_id === comment?.user.id,
+            ) ?? false,
         },
       }),
     );
@@ -69,37 +94,36 @@ export class CommentsService {
     post_id: number,
     commentPaylodValue: CommentOnPostDto,
   ): Promise<CommentsPostUserListResponseModel> {
-    const result = await this.postsRepository.manager.transaction(
-      async (manager) => {
-        const newComment = this.commentsRepository.create({
-          user_id: commentPaylodValue.user_id,
-          post_id,
-          content: commentPaylodValue.comment,
-        });
+    const result = await this.postsRepository.manager.transaction(async () => {
+      const newComment = this.commentsRepository.create({
+        user_id: commentPaylodValue.user_id,
+        post_id,
+        content: commentPaylodValue.comment,
+      });
 
-        const savedComment = await manager.save(newComment);
+      const savedComment = await this.commentsRepository.save(newComment);
 
-        const post = await this.getPostById(post_id);
-        post.comment_count += 1;
-        await this.postsRepository.save(post);
+      const post = await this.getPostById(post_id);
+      post.comment_count += 1;
+      await this.postsRepository.save(post);
 
-        const response: CommentsPostUserListResponseModel = {
-          id: savedComment?.id,
-          comment: savedComment.content,
-          created_date: savedComment.created_date?.toString() ?? '',
-          user: {
-            id: savedComment?.user.id,
-            user_name: savedComment?.user.user_name,
-            first_name: savedComment?.user.first_name ?? '',
-            last_name: savedComment?.user.last_name ?? '',
-            bio: savedComment?.user.bio ?? '',
-            photo_url: savedComment?.user.photo_url ?? '',
-            is_following: false,
-          },
-        };
-        return response;
-      },
-    );
+      const user = await this.getUserById(commentPaylodValue.user_id);
+      const response: CommentsPostUserListResponseModel = {
+        id: savedComment?.id,
+        comment: savedComment.content,
+        created_date: savedComment.created_date?.toString() ?? '',
+        user: {
+          id: user.id,
+          user_name: user.user_name,
+          first_name: user.first_name ?? '',
+          last_name: user.last_name ?? '',
+          bio: user.bio ?? '',
+          photo_url: user.photo_url ?? '',
+          is_following: false,
+        },
+      };
+      return response;
+    });
     return result;
   }
 

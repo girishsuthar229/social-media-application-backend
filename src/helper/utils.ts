@@ -1,4 +1,9 @@
-import { PostsOperation, RolesOperation, UsersOperation } from './enum';
+import {
+  FollowOperation,
+  PostsOperation,
+  RolesOperation,
+  UsersOperation,
+} from './enum';
 import { Messages } from './error-msg';
 
 export function sanitizeString(value: string): string {
@@ -57,6 +62,8 @@ export function getMessageByCode(messageKey: string): string {
       return Messages.PostMessages.PostsFetched;
     case PostsOperation.POST_CREATED:
       return Messages.PostMessages.PostCreated;
+    case PostsOperation.POST_DELETED:
+      return Messages.PostMessages.PostDeleted;
     case PostsOperation.POST_LIKED:
       return Messages.PostMessages.PostLike;
     case PostsOperation.POST_UNLIKED:
@@ -69,6 +76,11 @@ export function getMessageByCode(messageKey: string): string {
       return Messages.PostMessages.createCommonetOnPost;
     case PostsOperation.COMMENT_DELETE_ON_POST:
       return Messages.PostMessages.deleteCommonetOnPost;
+
+    case FollowOperation.USER_FOLLOW:
+      return Messages.FollowMessage.follow;
+    case FollowOperation.USER_UN_FOLLOW:
+      return Messages.FollowMessage.unfollow;
 
     default:
       return Messages.InternalServerError;
