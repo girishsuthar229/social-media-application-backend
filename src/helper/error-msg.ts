@@ -37,10 +37,17 @@ export const Messages = {
     PostLikedFetchedAllUsers: 'All user fetched  successfully',
     createCommonetOnPost: 'Comment create successfully.',
     deleteCommonetOnPost: 'Comment Deleted Successfully.',
+    PostSave: 'Post saved successfully',
+    PostUnSave: 'Post unsaved successfully',
   },
   FollowMessage: {
-    follow: 'User follow successfully',
-    unfollow: 'User unfollow successfully',
+    follow: 'user follow successfully',
+    followRequest: 'follow request sent successfully',
+    followAccepted: 'follow request accepted successfully',
+    followReqeustCancel: 'follow request cancel successfully',
+    unfollow: 'user unfollow successfully',
+    followers: 'followers fetched successfully',
+    followings: 'followings fetched successfully',
   },
 };
 export const ErrorMessages: Record<ErrorType, string> = {
@@ -100,8 +107,14 @@ export const ErrorMessages: Record<ErrorType, string> = {
   [ErrorType.CommentNotFound]: 'Comment not found.',
   [ErrorType.CommentNotAuthorized]:
     'You are not authorized to delete this comment. Only the comment author or post owner can delete it.',
-  [ErrorType.AlreadyFollowUser]: 'You already following this user.',
-  [ErrorType.AlreadyUnFollowUser]: 'You already un following this user.',
+  [ErrorType.AlreadyFollowUser]: 'Already following this user.',
+  [ErrorType.AlreadyFollowRequest]: 'Follow request already sent.',
+  [ErrorType.FollowRequestNotFound]: 'Follow request not found',
+  [ErrorType.FollowRequestNotAllow]:
+    'Not allowed to accept-cancel this request',
+  [ErrorType.AlreadyUnFollowUser]: 'Already un following this user.',
   [ErrorType.FollowNotAuthorized]:
     'You are not authorized to yourself follow-unfollow',
+  [ErrorType.AlreadySavedPost]: 'Post already saved',
+  [ErrorType.AlreadyUnSavedPost]: 'Post already un-saved',
 };

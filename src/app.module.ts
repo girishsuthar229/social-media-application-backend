@@ -16,6 +16,7 @@ import { SharesModule } from './module/shares/shares.module';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './module/auth/guards/jwt-auth.guard';
 import { CommentsModule } from './module/comments/comments.module';
+import { SavedPostsModule } from './module/saved_posts/saved_posts.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { CommentsModule } from './module/comments/comments.module';
     FollowsModule,
     SharesModule,
     CommentsModule,
+    SavedPostsModule,
   ],
   controllers: [],
   providers: [

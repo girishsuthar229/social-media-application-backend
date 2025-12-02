@@ -2,6 +2,8 @@ import { BaseEntity } from 'src/database/entities/base.entity';
 import { Entity, Column, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { Roles } from '../../roles/entity/role.entity';
 import { Follows } from 'src/module/follows/entity/follow.entity';
+import { SavedPostEntity } from 'src/module/saved_posts/entity/saved_posts.entity';
+import { CreatePost } from 'src/module/posts/entity/post.entity';
 
 @Entity('users')
 export class Users extends BaseEntity {
@@ -70,8 +72,11 @@ export class Users extends BaseEntity {
   is_private: boolean;
 
   @OneToMany(() => Follows, (follow) => follow.follower)
-  following: Follows[];
+  followers: Follows[];
 
   @OneToMany(() => Follows, (follow) => follow.following)
-  followers: Follows[];
+  followings: Follows[];
+
+  @OneToMany(() => CreatePost, (post) => post.user)
+  posts: CreatePost[];
 }

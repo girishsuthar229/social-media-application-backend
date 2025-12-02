@@ -5,7 +5,6 @@ import {
 } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { Roles } from './entity/role.entity';
-import { Users } from '../users/entity/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ErrorType } from 'src/helper/enum';
 import { ErrorMessages } from 'src/helper/error-msg';
@@ -17,8 +16,6 @@ export class RolesService {
   constructor(
     @InjectRepository(Roles)
     private roleRepository: Repository<Roles>,
-    @InjectRepository(Users)
-    private userRepository: Repository<Users>,
   ) {}
 
   async getAllRoles(): Promise<Roles[]> {

@@ -25,6 +25,7 @@ export interface GetAllPostsReponseModel {
   created_date: string;
   modified_date: string | null;
   is_liked: boolean;
+  is_saved: boolean;
 }
 export interface UserAllPostsResponseModel {
   post_id: number;
@@ -32,6 +33,4 @@ export interface UserAllPostsResponseModel {
   like_count: number;
   share_count: number;
   comment_count: number;
-  self_comment: string | null;
-  is_following: boolean;
 }

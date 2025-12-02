@@ -69,8 +69,13 @@ export enum ErrorType {
   CommentNotFound = 'CommentNotFound',
   CommentNotAuthorized = 'CommentNotAuthorized',
   AlreadyFollowUser = 'AlreadyFollowUser',
+  AlreadyFollowRequest = 'AlreadyFollowRequest',
+  FollowRequestNotFound = 'FollowRequestNotFound',
+  FollowRequestNotAllow = 'FollowRequestNotAllow',
   AlreadyUnFollowUser = 'AlreadyUnFollowUser',
   FollowNotAuthorized = 'FollowNotAuthorized',
+  AlreadySavedPost = 'AlreadySavedPost',
+  AlreadyUnSavedPost = 'AlreadyUnSavedPost',
 }
 
 export enum RolesOperation {
@@ -122,8 +127,15 @@ export enum PostsOperation {
   COMMENT_ALL_USERS_FETCHED = 'COMMENT_ALL_USERS_FETCHED',
   COMMENT_USER_ON_POST = 'COMMENT_USER_ON_POST',
   COMMENT_DELETE_ON_POST = 'COMMENT_DELETE_ON_POST',
+  POST_SAVE = 'POST_SAVE',
+  POST_UNSAVE = 'POST_UNSAVE',
 }
 export enum FollowOperation {
   USER_FOLLOW = 'USER_FOLLOW',
+  USER_FOLLOW_REQUEST_SENT = 'USER_FOLLOW_REQUEST_SENT',
+  FOLLOW_REQUEST_ACCEPTED = 'FOLLOW_REQUEST_ACCEPTED',
+  FOLLOW_REQUEST_CANCELED = 'FOLLOW_REQUEST_CANCELED',
   USER_UN_FOLLOW = 'USER_UN_FOLLOW',
+  FOLLOWERS_FETCHED = 'FOLLOWERS_FETCHED',
+  FOLLOWING_FETCHED = 'FOLLOWING_FETCHED',
 }

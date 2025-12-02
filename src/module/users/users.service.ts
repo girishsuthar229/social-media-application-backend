@@ -6,7 +6,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Raw, Repository } from 'typeorm';
+import { IsNull, Raw, Repository } from 'typeorm';
 import { Users } from './entity/user.entity';
 import { RolesService } from '../roles/roles.service';
 import { JwtService } from '@nestjs/jwt';
@@ -19,6 +19,7 @@ import {
 } from 'src/helper';
 import { v4 as uuidv4 } from 'uuid';
 import {
+  AnotherUserDetailResponse,
   DecodedTokenPayload,
   UserListResponseModel,
   UserProfileDetailsModel,
@@ -30,6 +31,7 @@ import { UpdateUserProfileDto } from './dto/update-user.dto';
 import { deleteLocalFile, saveFileLocally } from 'src/helper/file-upload';
 import { GetAllUsersDto, SortOrder, UserSortBy } from './dto/get-all-users.dto';
 import { SearchResponse } from 'src/helper/interface';
+import { FollowingsEnum } from '../follows/entity/follow.entity';
 
 @Injectable()
 export class UsersService {
@@ -83,21 +85,21 @@ export class UsersService {
     await this.usersRepository.save(user);
   }
 
-  private async sendVerificationEmail(
-    user: Users,
-    email: string,
-    generatedOTP: string,
-    expiresIn: string,
-  ) {
-    const subject = 'Your Password Reset Verification Code';
-    const htmlMessage = `
-    <p>Dear ${user.first_name} ${user.last_name},</p>
-    <p>You have requested to reset your password.<br>Your verification code is: <strong>${generatedOTP}</strong></p>
-    <p>This code is valid for <strong>${expiresIn}</strong> only. For security reasons, please do not share this code with anyone.</p>
-    <p>Thank you</p>
-  `;
-    await Mailer.sendMail(email, subject, htmlMessage);
-  }
+  // private async sendVerificationEmail(
+  //   user: Users,
+  //   email: string,
+  //   generatedOTP: string,
+  //   expiresIn: string,
+  // ) {
+  //   const subject = 'Your Password Reset Verification Code';
+  //   const htmlMessage = `
+  //   <p>Dear ${user.first_name} ${user.last_name},</p>
+  //   <p>You have requested to reset your password.<br>Your verification code is: <strong>${generatedOTP}</strong></p>
+  //   <p>This code is valid for <strong>${expiresIn}</strong> only. For security reasons, please do not share this code with anyone.</p>
+  //   <p>Thank you</p>
+  // `;
+  //   await Mailer.sendMail(email, subject, htmlMessage);
+  // }
 
   private async decodeToken(token: string): Promise<string> {
     try {
@@ -435,6 +437,43 @@ export class UsersService {
     return result[0];
   }
 
+  async getAnotherUserProfile(
+    uName: string,
+    currentUserId: number,
+  ): Promise<AnotherUserDetailResponse> {
+    const user = await this.usersRepository.findOne({
+      where: { user_name: uName, deleted_date: IsNull() },
+      relations: ['followers', 'followings', 'posts'],
+    });
+
+    if (!user) {
+      throw new NotFoundException({
+        error: ErrorType.UserNotFound,
+        message: ErrorMessages[ErrorType.UserNotFound],
+      });
+    }
+    const response: AnotherUserDetailResponse = {
+      id: user.id,
+      user_name: user.user_name,
+      first_name: user.first_name ?? '',
+      last_name: user.last_name ?? '',
+      bio: user.bio ?? null,
+      photo_url: user.photo_url ?? '',
+      is_private: user.is_private,
+      is_following:
+        user.followings?.some(
+          (f) => f.follower_id === currentUserId && f.following_id === user.id,
+        ) ?? false,
+      follower_count: user.followings.filter((f) => f.following_id === user.id)
+        .length,
+      following_count: user.followers.filter((f) => f.follower_id === user.id)
+        .length,
+      post_count: user.posts.filter((p) => p.user_id === user.id).length,
+    };
+
+    return response;
+  }
+
   async updateUserProfileDetails(
     id: number,
     updateUserProfileDto: UpdateUserProfileDto,
@@ -490,13 +529,23 @@ export class UsersService {
     const queryBuilder = this.usersRepository
       .createQueryBuilder('u')
       .leftJoinAndSelect('u.followers', 'followers')
+      .leftJoinAndSelect('u.followings', 'followings')
       .where('u.deleted_date IS NULL');
-
     // Apply search filter if search term exists
     if (search) {
+      const searchParts = search.trim().split(' ');
+      let firstNameSearch = searchParts[0];
+      let lastNameSearch = searchParts[1] || '';
+
       queryBuilder.andWhere(
-        '(u.user_name LIKE :search OR u.first_name LIKE :search OR u.last_name LIKE :search OR u.email LIKE :search)',
-        { search: `%${search}%` },
+        '(u.user_name ILIKE :search OR ' +
+          '(u.first_name ILIKE :firstNameSearch AND u.last_name ILIKE :lastNameSearch) OR ' +
+          '(u.first_name ILIKE :lastNameSearch AND u.last_name ILIKE :firstNameSearch))',
+        {
+          search: `%${search}%`,
+          firstNameSearch: `%${firstNameSearch}%`,
+          lastNameSearch: `%${lastNameSearch}%`,
+        },
       );
     }
 
@@ -516,30 +565,41 @@ export class UsersService {
     queryBuilder.take(limit).skip(offset);
     const [users, total] = await queryBuilder.getManyAndCount();
 
-    const rows: UserListResponseModel[] = users.map((user) => ({
-      id: user.id,
-      user_name: user.user_name,
-      first_name: user.first_name ?? '',
-      last_name: user.last_name ?? '',
-      email: user.email ?? '',
-      bio: user.bio ?? null,
-      mobile_number: user.mobile_number ?? '',
-      photo_url: user.photo_url ?? '',
-      birth_date: user.birth_date?.toString() ?? null,
-      address: user.address ?? '',
-      is_private: user.is_private,
-      is_following:
-        user.followers?.some(
-          (f) => f.follower_id === currentUserId && f.following_id === user.id,
-        ) ?? false,
-      follower_count: user.followers.filter((f) => f.following_id === user.id)
-        .length,
-      following_count: user.followers.filter((f) => f.follower_id === user.id)
-        .length,
-      role_id: user.role_id,
-      created_date: user.created_date.toString(),
-      modified_date: user.modified_date?.toString() ?? null,
-    }));
+    const rows: UserListResponseModel[] = users.map((user) => {
+      const followRelation = user.followings?.find(
+        (f) => f.follower_id === currentUserId && f.following_id === user.id,
+      );
+      return {
+        id: user.id,
+        user_name: user.user_name,
+        first_name: user.first_name ?? '',
+        last_name: user.last_name ?? '',
+        email: user.email ?? '',
+        bio: user.bio ?? null,
+        mobile_number: user.mobile_number ?? '',
+        photo_url: user.photo_url ?? '',
+        birth_date: user.birth_date?.toString() ?? null,
+        address: user.address ?? '',
+        is_private: user.is_private,
+        is_following:
+          user.followings?.some(
+            (f) =>
+              f.follower_id === currentUserId && f.following_id === user.id,
+          ) ?? false,
+        follow_status: followRelation?.status || null,
+        follower_count: user.followings.filter(
+          (f) =>
+            f.following_id === user.id && f.status === FollowingsEnum.ACCEPTED,
+        ).length,
+        following_count: user.followers.filter(
+          (f) =>
+            f.follower_id === user.id && f.status === FollowingsEnum.ACCEPTED,
+        ).length,
+        role_id: user.role_id,
+        created_date: user.created_date.toString(),
+        modified_date: user.modified_date?.toString() ?? null,
+      };
+    });
 
     return { count: total, rows };
   }

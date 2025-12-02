@@ -71,9 +71,8 @@ export class PostsController {
   @Post('/get-user-wise-all-posts')
   async getUserPosts(
     @Body() queryDto: UserAllPostsDto,
-    @CurrentUser() user: UserDetails,
   ): Promise<IResponse<SearchResponse<UserAllPostsResponseModel>>> {
-    const result = await this.postsService.getUserPosts(user.id, queryDto);
+    const result = await this.postsService.getUserPosts(queryDto);
     return ResponseUtil.success(
       result,
       PostsOperation.USER_POSTS_FETCHED,

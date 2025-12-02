@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { CreatePost } from '../posts/entity/post.entity';
-import { IsNull, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Comment } from './entity/comment.entity';
 import { CommentsPostUserListResponseModel } from './interface/comments.interface';

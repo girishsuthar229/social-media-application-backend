@@ -1,11 +1,4 @@
-import {
-  Body,
-  Controller,
-  HttpStatus,
-  Post,
-  Req,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, HttpStatus, Post, Req, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Public } from 'src/decorators';
 import { AccessTypes, IResponse, UsersOperation } from 'src/helper';

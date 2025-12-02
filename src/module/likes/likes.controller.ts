@@ -4,7 +4,6 @@ import {
   HttpStatus,
   Param,
   ParseIntPipe,
-  Post,
 } from '@nestjs/common';
 import { LikesService } from './likes.service';
 import { CurrentUser } from 'src/decorators';

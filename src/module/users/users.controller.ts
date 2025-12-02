@@ -4,7 +4,6 @@ import {
   Get,
   HttpStatus,
   Param,
-  ParseIntPipe,
   Post,
   Put,
   UploadedFile,
@@ -29,6 +28,7 @@ import {
 } from './dto/user-password.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import {
+  AnotherUserDetailResponse,
   UserListResponseModel,
   UserProfileDetailsModel,
 } from './interface/users.interface';
@@ -119,6 +119,22 @@ export class UsersController {
     @CurrentUser() user: UserDetails,
   ): Promise<IResponse<UserProfileDetailsModel>> {
     const userDetail = await this.usersService.getUserProfileDetails(user.id);
+    return ResponseUtil.success(
+      userDetail,
+      UsersOperation.FETCHED,
+      HttpStatus.OK,
+    );
+  }
+
+  @Get('profile/:username')
+  async getUserProfile(
+    @Param('username') username: string,
+    @CurrentUser() user: UserDetails,
+  ): Promise<IResponse<AnotherUserDetailResponse>> {
+    const userDetail = await this.usersService.getAnotherUserProfile(
+      username,
+      user.id,
+    );
     return ResponseUtil.success(
       userDetail,
       UsersOperation.FETCHED,

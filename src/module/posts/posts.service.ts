@@ -19,6 +19,7 @@ import {
 import { UserAllPostsDto } from './dto/user-all-posts.dto';
 import { ErrorMessages } from 'src/helper';
 import { Users } from '../users/entity/user.entity';
+import { FollowingsEnum } from '../follows/entity/follow.entity';
 
 @Injectable()
 export class PostsService {
@@ -27,8 +28,6 @@ export class PostsService {
     private postsRepository: Repository<CreatePost>,
     @InjectRepository(Users)
     private usersRepository: Repository<Users>,
-    // @InjectRepository(FollowEntity)
-    // private followersRepository: Repository<FollowEntity>,
   ) {}
 
   async createPost(
@@ -76,24 +75,30 @@ export class PostsService {
     } = queryDto;
     const queryBuilder = this.postsRepository
       .createQueryBuilder('p')
-      .leftJoinAndSelect('p.user', 'user')
+      .leftJoinAndSelect('p.user', 'postUser')
       .leftJoinAndSelect('p.comments', 'comment')
       .leftJoinAndSelect('comment.user', 'commentUser')
       .leftJoinAndSelect('p.likes', 'like')
-      .leftJoinAndSelect('user.followers', 'followers')
+      .leftJoinAndSelect('p.saved_posts', 'saved_post')
+      .leftJoinAndSelect('postUser.followers', 'followUser')
       .where('p.deleted_date IS NULL')
-      .andWhere(`
-        (
-          user.is_private = false
-          OR user.id = :currentUserId
-          OR followers.follower_id = :currentUserId
+      .andWhere(
+        `(postUser.is_private = false OR postUser.id = :currentUserId 
+        OR EXISTS (
+          SELECT 1 FROM follows f
+          WHERE f.follower_id = :currentUserId AND f.following_id = p.user_id  AND f.status = :acceptedStatus
         )
-      `, { currentUserId });
-  
+      )`,
+        {
+          currentUserId,
+          acceptedStatus: FollowingsEnum.ACCEPTED,
+        },
+      );
+
     queryBuilder.addOrderBy(`p.${sortBy}`, sortOrder);
     queryBuilder.take(limit).skip(offset);
-    const [posts, total] = await queryBuilder.getManyAndCount();
-    const response: GetAllPostsReponseModel[] = posts.map((post) => {
+    const [userPosts, total] = await queryBuilder.getManyAndCount();
+    const response: GetAllPostsReponseModel[] = userPosts.map((post) => {
       return {
         post_id: post?.id,
         content: post?.content,
@@ -118,6 +123,9 @@ export class PostsService {
         modified_date: post?.modified_date?.toString() ?? null,
         is_liked:
           post.likes?.some((like) => like.user_id === currentUserId) ?? false,
+        is_saved:
+          post.saved_posts?.some((spost) => spost.user_id === currentUserId) ??
+          false,
       };
     });
 
@@ -125,7 +133,6 @@ export class PostsService {
   }
 
   async getUserPosts(
-    loggedUserId: number,
     alluserPostDto: UserAllPostsDto,
   ): Promise<SearchResponse<UserAllPostsResponseModel>> {
     const {
@@ -140,7 +147,6 @@ export class PostsService {
       error: ErrorType.UserNotFound,
       message: ErrorMessages[ErrorType.UserNotFound],
     };
-    // Check if the user's account is private
     const postsUser = await this.usersRepository.findOne({
       where: { id: userId },
       select: ['id', 'is_private'],
@@ -148,20 +154,20 @@ export class PostsService {
     if (!postsUser) {
       throw new NotFoundException(userNotFoundError);
     }
-
-    // const isFollowing = await this.followersRepository.exists({
-    //   where: {
-    //     followerId: loggedUserId,
-    //     followedId: user_id,
-    //   },
-    // });
-    // if (postsUser.is_private && !isFollowing && loggedUserId !== user_id) {
-    //   return { count: 0, rows: [] };
-    // }
-
     const queryBuilder = this.postsRepository
       .createQueryBuilder('p')
-      .where('p.deleted_date IS NULL AND p.user_id = :userId', { userId });
+      .leftJoinAndSelect('p.user', 'user')
+      .leftJoinAndSelect('user.followers', 'followers')
+      .where('p.deleted_date IS NULL AND p.user_id = :userId', { userId })
+      .andWhere(
+        `(
+        user.is_private = false
+        OR user.id = :userId
+        OR followers.follower_id = :userId
+      )`,
+        { userId },
+      );
+
     queryBuilder.addOrderBy(`p.${sortBy}`, sortOrder);
     queryBuilder.take(limit).skip(offset);
     const [posts, total] = await queryBuilder.getManyAndCount();
@@ -171,17 +177,9 @@ export class PostsService {
       like_count: post?.like_count,
       share_count: post?.share_count,
       comment_count: post?.comment_count,
-      self_comment: post?.self_comment || '',
-      is_following: true,
-      // is_following: isFollowing || false,
     }));
 
-    // Check if logged user is requesting their own posts
-    if (loggedUserId === userId || !postsUser.is_private) {
-      return { count: total, rows: response };
-    }
-
-    return { count: 0, rows: [] };
+    return { count: total, rows: response };
   }
 
   async getPostById(id: number): Promise<CreatePost> {

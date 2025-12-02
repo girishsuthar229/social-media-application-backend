@@ -76,11 +76,25 @@ export function getMessageByCode(messageKey: string): string {
       return Messages.PostMessages.createCommonetOnPost;
     case PostsOperation.COMMENT_DELETE_ON_POST:
       return Messages.PostMessages.deleteCommonetOnPost;
+    case PostsOperation.POST_SAVE:
+      return Messages.PostMessages.PostSave;
+    case PostsOperation.POST_UNSAVE:
+      return Messages.PostMessages.PostUnSave;
 
     case FollowOperation.USER_FOLLOW:
       return Messages.FollowMessage.follow;
+    case FollowOperation.USER_FOLLOW_REQUEST_SENT:
+      return Messages.FollowMessage.followRequest;
+    case FollowOperation.FOLLOW_REQUEST_ACCEPTED:
+      return Messages.FollowMessage.followAccepted;
+    case FollowOperation.FOLLOW_REQUEST_CANCELED:
+      return Messages.FollowMessage.followReqeustCancel;
     case FollowOperation.USER_UN_FOLLOW:
       return Messages.FollowMessage.unfollow;
+    case FollowOperation.FOLLOWERS_FETCHED:
+      return Messages.FollowMessage.followers;
+    case FollowOperation.FOLLOWING_FETCHED:
+      return Messages.FollowMessage.followings;
 
     default:
       return Messages.InternalServerError;

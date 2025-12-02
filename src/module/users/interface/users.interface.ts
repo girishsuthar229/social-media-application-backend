@@ -38,9 +38,24 @@ export class UserListResponseModel {
   address: string;
   is_private: boolean;
   is_following: boolean;
+  follow_status: string | null;
   follower_count: number;
   following_count: number;
   role_id: number;
   created_date: string;
   modified_date: string | null;
+}
+
+export class AnotherUserDetailResponse {
+  id: number;
+  user_name: string;
+  first_name: string | null;
+  last_name: string | null;
+  bio: string | null;
+  photo_url: string | null;
+  is_private?: boolean;
+  is_following?: boolean;
+  follower_count?: number;
+  following_count?: number;
+  post_count?: number;
 }
