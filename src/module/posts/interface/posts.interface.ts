@@ -34,3 +34,22 @@ export interface UserAllPostsResponseModel {
   share_count: number;
   comment_count: number;
 }
+
+export interface GetPostByIdReponse {
+  id: number;
+  content: string;
+  image_url: string;
+  like_count: number;
+  share_count: number;
+  comment_count: number;
+  self_comment: string | null;
+  created_date: string;
+  modified_date: string | null;
+  is_liked: boolean;
+  is_saved: boolean;
+  user: {
+    id: number;
+    user_name: string;
+    profile_pic_url: string;
+  };
+}

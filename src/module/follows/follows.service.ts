@@ -252,19 +252,23 @@ export class FollowsService {
           f.follower_id === currentUserId && f.following_id === followerUser.id,
       );
       return {
-        id: followerUser?.id,
-        user_name: followerUser?.user_name,
-        first_name: followerUser?.first_name || '',
-        last_name: followerUser?.last_name || '',
-        photo_url: followerUser?.photo_url || '',
-        bio: followerUser?.bio || '',
-        is_following:
-          followerUser?.followings?.some(
-            (f) =>
-              f.follower_id === currentUserId &&
-              f.following_id === followerUser.id,
-          ) ?? false,
-        follow_status: followRelation?.status || null,
+        id: follow?.id,
+        created_date: follow.created_date.toString(),
+        user: {
+          id: followerUser?.id,
+          user_name: followerUser?.user_name,
+          first_name: followerUser?.first_name || '',
+          last_name: followerUser?.last_name || '',
+          photo_url: followerUser?.photo_url || '',
+          bio: followerUser?.bio || '',
+          is_following:
+            followerUser?.followings?.some(
+              (f) =>
+                f.follower_id === currentUserId &&
+                f.following_id === followerUser.id,
+            ) ?? false,
+          follow_status: followRelation?.status || null,
+        },
       };
     });
 
@@ -301,18 +305,22 @@ export class FollowsService {
         );
         return {
           id: following?.id,
-          user_name: following?.user_name,
-          first_name: following?.first_name || '',
-          last_name: following?.last_name || '',
-          photo_url: following?.photo_url || '',
-          bio: following?.bio || '',
-          is_following:
-            following?.followings?.some(
-              (f) =>
-                f.follower_id === currentUserId &&
-                f.following_id === following.id,
-            ) ?? false,
-          follow_status: followRelation?.status || null,
+          created_date: following.created_date.toString(),
+          user: {
+            id: following?.id,
+            user_name: following?.user_name,
+            first_name: following?.first_name || '',
+            last_name: following?.last_name || '',
+            photo_url: following?.photo_url || '',
+            bio: following?.bio || '',
+            is_following:
+              following?.followings?.some(
+                (f) =>
+                  f.follower_id === currentUserId &&
+                  f.following_id === following.id,
+              ) ?? false,
+            follow_status: followRelation?.status || null,
+          },
         };
       },
     );

@@ -87,24 +87,38 @@ export class LikesService {
     const queryBuilder = this.likesRepository
       .createQueryBuilder('l')
       .leftJoinAndSelect('l.user', 'user')
-      .leftJoinAndSelect('user.followers', 'followers')
+      .leftJoinAndSelect('user.followings', 'followings')
       .where('l.post_id = :post_id', { post_id })
       .andWhere('user.deleted_date IS NULL');
 
     const [likedUsers] = await queryBuilder.getManyAndCount();
-    const result: LikePostUserListResponseModel[] = likedUsers.map((like) => ({
-      id: like.user.id,
-      user_name: like.user.user_name,
-      first_name: like.user?.first_name || '',
-      last_name: like.user?.last_name || '',
-      photo_url: like.user?.photo_url || '',
-      bio: like.user?.bio || '',
-      is_following:
-        like?.user.followers?.some(
-          (f) =>
-            f.follower_id === currentUserId && f.following_id === like?.user.id,
-        ) ?? false,
-    }));
+
+    const result: LikePostUserListResponseModel[] = likedUsers.map((like) => {
+      const likeUser = like.user;
+      const followRelation = likeUser.followings?.find(
+        (f) =>
+          f.follower_id === currentUserId && f.following_id === likeUser.id,
+      );
+      return {
+        id: like.id,
+        created_date: like.created_date.toString(),
+        user: {
+          id: likeUser.id,
+          user_name: likeUser.user_name,
+          first_name: likeUser?.first_name || '',
+          last_name: likeUser?.last_name || '',
+          photo_url: likeUser?.photo_url || '',
+          bio: likeUser?.bio || '',
+          is_following:
+            likeUser.followings?.some(
+              (f) =>
+                f.follower_id === currentUserId &&
+                f.following_id === likeUser.id,
+            ) ?? false,
+          follow_status: followRelation?.status || null,
+        },
+      };
+    });
 
     return result;
   }

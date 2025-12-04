@@ -7,13 +7,17 @@ export class FollowUnFollowResponseModel {
 
 export class FollowUserListResponseModel {
   id: number;
-  user_name: string;
-  first_name?: string;
-  last_name?: string;
-  photo_url?: string | null;
-  bio?: string | null;
-  is_following?: boolean;
-  follow_status: string | null;
+  created_date: string;
+  user: {
+    id: number;
+    user_name: string;
+    first_name?: string;
+    last_name?: string;
+    photo_url?: string;
+    bio?: string;
+    is_following?: boolean;
+    follow_status: string | null;
+  };
 }
 
 export class PendingFollowUsers {

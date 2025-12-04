@@ -54,6 +54,7 @@ export class AnotherUserDetailResponse {
   bio: string | null;
   photo_url: string | null;
   is_private?: boolean;
+  follow_status: string | null;
   is_following?: boolean;
   follower_count?: number;
   following_count?: number;

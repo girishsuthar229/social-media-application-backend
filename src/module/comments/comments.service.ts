@@ -60,31 +60,41 @@ export class CommentsService {
     const queryBuilder = this.commentsRepository
       .createQueryBuilder('c')
       .leftJoinAndSelect('c.user', 'user')
-      .leftJoinAndSelect('user.followers', 'followers')
+      .leftJoinAndSelect('user.followings', 'followings')
       .where('c.post_id = :post_id', { post_id })
       .andWhere('user.deleted_date IS NULL');
 
     const [commentUsers] = await queryBuilder.getManyAndCount();
+
     const result: CommentsPostUserListResponseModel[] = commentUsers.map(
-      (comment) => ({
-        id: comment.id,
-        comment: comment.content,
-        created_date: comment.created_date.toString(),
-        user: {
-          id: comment.user.id,
-          user_name: comment.user.user_name,
-          first_name: comment.user?.first_name || '',
-          last_name: comment.user?.last_name || '',
-          photo_url: comment.user?.photo_url || '',
-          bio: comment.user?.bio || '',
-          is_following:
-            comment?.user.followers?.some(
-              (f) =>
-                f.follower_id === currentUserId &&
-                f.following_id === comment?.user.id,
-            ) ?? false,
-        },
-      }),
+      (comment) => {
+        const commentUser = comment.user;
+        const followRelation = commentUser.followings?.find(
+          (f) =>
+            f.follower_id === currentUserId &&
+            f.following_id === commentUser.id,
+        );
+        return {
+          id: comment.id,
+          comment: comment.content,
+          created_date: comment.created_date.toString(),
+          user: {
+            id: commentUser.id,
+            user_name: commentUser.user_name,
+            first_name: commentUser?.first_name || '',
+            last_name: commentUser?.last_name || '',
+            photo_url: commentUser?.photo_url || '',
+            bio: commentUser?.bio || '',
+            is_following:
+              commentUser?.followings?.some(
+                (f) =>
+                  f.follower_id === currentUserId &&
+                  f.following_id === commentUser.id,
+              ) ?? false,
+            follow_status: followRelation?.status || null,
+          },
+        };
+      },
     );
 
     return result;
@@ -120,6 +130,7 @@ export class CommentsService {
           bio: user.bio ?? '',
           photo_url: user.photo_url ?? '',
           is_following: false,
+          follow_status: null,
         },
       };
       return response;

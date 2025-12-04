@@ -14,6 +14,7 @@ import { PostSortBy, QueryPostDto, SortOrder } from './dto/query-post.dto';
 import { SearchResponse } from 'src/helper/interface';
 import {
   GetAllPostsReponseModel,
+  GetPostByIdReponse,
   UserAllPostsResponseModel,
 } from './interface/posts.interface';
 import { UserAllPostsDto } from './dto/user-all-posts.dto';
@@ -182,17 +183,44 @@ export class PostsService {
     return { count: total, rows: response };
   }
 
-  async getPostById(id: number): Promise<CreatePost> {
+  async getPostById(
+    currentUserId: number,
+    postId: number,
+  ): Promise<GetPostByIdReponse> {
     const post = await this.postsRepository.findOne({
-      where: { id },
-      relations: ['user'],
+      where: { id: postId },
+      relations: ['user', 'likes', 'saved_posts'],
     });
 
     if (!post) {
-      throw new NotFoundException('Post not found');
+      throw new NotFoundException({
+        error: ErrorType.PostNotFound,
+        message: ErrorMessages[ErrorType.PostNotFound],
+      });
     }
+    const response: GetPostByIdReponse = {
+      id: post?.id,
+      content: post?.content,
+      image_url: post?.image_url,
+      like_count: post?.like_count,
+      share_count: post?.share_count,
+      comment_count: post?.comment_count,
+      self_comment: post?.self_comment || '',
+      user: {
+        id: post?.user?.id,
+        user_name: post?.user?.user_name,
+        profile_pic_url: post?.user?.photo_url || '',
+      },
+      created_date: post?.created_date?.toString() ?? null,
+      modified_date: post?.modified_date?.toString() ?? null,
+      is_liked:
+        post.likes?.some((like) => like.user_id === currentUserId) ?? false,
+      is_saved:
+        post.saved_posts?.some((spost) => spost.user_id === currentUserId) ??
+        false,
+    };
 
-    return post;
+    return response;
   }
 
   async updatePost(
@@ -200,9 +228,17 @@ export class PostsService {
     user_id: number,
     updatePostDto: UpdatePostDto,
   ): Promise<CreatePost> {
-    const post = await this.getPostById(id);
-
-    if (post.user.id !== user_id) {
+    const post = await this.postsRepository.findOne({
+      where: { id: id },
+      relations: ['user'],
+    });
+    if (!post) {
+      throw new NotFoundException({
+        error: ErrorType.PostNotFound,
+        message: ErrorMessages[ErrorType.PostNotFound],
+      });
+    }
+    if (post?.user_id !== user_id) {
       throw new ForbiddenException('You can only edit your own posts');
     }
 
@@ -246,9 +282,17 @@ export class PostsService {
   }
 
   async deletePost(id: number, user_id: number): Promise<void> {
-    const post = await this.getPostById(id);
-
-    if (post.user.id !== user_id) {
+    const post = await this.postsRepository.findOne({
+      where: { id: id },
+      relations: ['user'],
+    });
+    if (!post) {
+      throw new NotFoundException({
+        error: ErrorType.PostNotFound,
+        message: ErrorMessages[ErrorType.PostNotFound],
+      });
+    }
+    if (post?.user_id !== user_id) {
       throw new ForbiddenException({
         error: ErrorType.PostNotAuthorized,
         message: ErrorMessages[ErrorType.PostNotAuthorized],
@@ -257,12 +301,5 @@ export class PostsService {
 
     post.deleted_date = new Date();
     await this.postsRepository.save(post);
-  }
-
-  async sharePost(id: number): Promise<CreatePost> {
-    const post = await this.getPostById(id);
-
-    post.share_count += 1;
-    return this.postsRepository.save(post);
   }
 }

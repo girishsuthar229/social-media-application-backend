@@ -24,6 +24,7 @@ import { QueryPostDto } from './dto/query-post.dto';
 import { SearchResponse } from 'src/helper/interface';
 import {
   GetAllPostsReponseModel,
+  GetPostByIdReponse,
   UserAllPostsResponseModel,
 } from './interface/posts.interface';
 import { UserAllPostsDto } from './dto/user-all-posts.dto';
@@ -80,12 +81,12 @@ export class PostsController {
     );
   }
 
-  @Get(':id')
+  @Get('/post/:postId')
   async getPostById(
-    @Param('id', ParseIntPipe) id: number,
+    @Param('postId', ParseIntPipe) postId: number,
     @CurrentUser() user: UserDetails,
-  ): Promise<IResponse<CreatePost>> {
-    const post = await this.postsService.getPostById(id);
+  ): Promise<IResponse<GetPostByIdReponse>> {
+    const post = await this.postsService.getPostById(user?.id, postId);
     return ResponseUtil.success(
       post,
       PostsOperation.POST_FETCHED,
@@ -126,19 +127,6 @@ export class PostsController {
     return ResponseUtil.success(
       null,
       PostsOperation.POST_DELETED,
-      HttpStatus.OK,
-    );
-  }
-
-  @Post(':id/share')
-  async sharePost(
-    @Param('id', ParseIntPipe) id: number,
-    @CurrentUser() user: UserDetails,
-  ): Promise<IResponse<CreatePost>> {
-    const post = await this.postsService.sharePost(id);
-    return ResponseUtil.success(
-      post,
-      PostsOperation.POST_SHARED,
       HttpStatus.OK,
     );
   }

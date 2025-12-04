@@ -452,6 +452,9 @@ export class UsersService {
         message: ErrorMessages[ErrorType.UserNotFound],
       });
     }
+    const followRelation = user.followings?.find(
+      (f) => f.follower_id === currentUserId && f.following_id === user.id,
+    );
     const response: AnotherUserDetailResponse = {
       id: user.id,
       user_name: user.user_name,
@@ -460,14 +463,19 @@ export class UsersService {
       bio: user.bio ?? null,
       photo_url: user.photo_url ?? '',
       is_private: user.is_private,
+      follow_status: followRelation?.status || null,
       is_following:
         user.followings?.some(
           (f) => f.follower_id === currentUserId && f.following_id === user.id,
         ) ?? false,
-      follower_count: user.followings.filter((f) => f.following_id === user.id)
-        .length,
-      following_count: user.followers.filter((f) => f.follower_id === user.id)
-        .length,
+      follower_count: user.followings.filter(
+        (f) =>
+          f.following_id === user.id && f.status === FollowingsEnum.ACCEPTED,
+      ).length,
+      following_count: user.followers.filter(
+        (f) =>
+          f.follower_id === user.id && f.status === FollowingsEnum.ACCEPTED,
+      ).length,
       post_count: user.posts.filter((p) => p.user_id === user.id).length,
     };
 
