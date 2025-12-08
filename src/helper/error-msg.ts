@@ -61,6 +61,7 @@ export const ErrorMessages: Record<ErrorType, string> = {
     'There was some technical error processing this request. Please try again.',
   [ErrorType.InvalidPassword]: 'Password must be at least 8 characters long.',
   [ErrorType.UserNotFound]: 'User not found',
+  [ErrorType.UserAcountPrivate]: 'User account is private',
   [ErrorType.DuplicatePasswordError]:
     'The new password cannot be the same as the current password.',
   [ErrorType.PasswordMismatch]:

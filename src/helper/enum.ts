@@ -33,6 +33,7 @@ export enum ErrorType {
   InvalidCredentials = 'InvalidCredentials',
   InvalidPassword = 'InvalidPassword',
   UserNotFound = 'UserNotFound',
+  UserAcountPrivate = 'UserAcountPrivate',
   DuplicatePasswordError = 'DuplicatePasswordError',
   PasswordMismatch = 'PasswordMismatch',
   InvalidNewPassword = 'InvalidNewPassword',

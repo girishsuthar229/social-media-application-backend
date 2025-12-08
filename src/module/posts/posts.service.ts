@@ -1,4 +1,5 @@
 import {
+  ConflictException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -135,6 +136,7 @@ export class PostsService {
 
   async getUserPosts(
     alluserPostDto: UserAllPostsDto,
+    currentUserId: number,
   ): Promise<SearchResponse<UserAllPostsResponseModel>> {
     const {
       offset,
@@ -151,9 +153,26 @@ export class PostsService {
     const postsUser = await this.usersRepository.findOne({
       where: { id: userId },
       select: ['id', 'is_private'],
+      relations: ['followings'],
     });
     if (!postsUser) {
       throw new NotFoundException(userNotFoundError);
+    }
+
+    if (Number(postsUser?.id) !== currentUserId && postsUser.is_private) {
+      const is_following =
+        postsUser.followings?.some(
+          (f) =>
+            f.follower_id === currentUserId &&
+            f.following_id === postsUser.id &&
+            f.status == FollowingsEnum.ACCEPTED,
+        ) ?? false;
+      if (!is_following) {
+        throw new ConflictException({
+          error: ErrorType.UserAcountPrivate,
+          message: ErrorMessages[ErrorType.UserAcountPrivate],
+        });
+      }
     }
     const queryBuilder = this.postsRepository
       .createQueryBuilder('p')

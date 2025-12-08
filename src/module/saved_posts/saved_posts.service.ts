@@ -66,7 +66,7 @@ export class SavedPostsService {
       .leftJoinAndSelect('sp.post', 'post')
       .leftJoinAndSelect('post.user', 'postOwner')
       .leftJoinAndSelect('postOwner.followers', 'followers')
-      .where('sp.user_id = :userId', { userId })
+      .where('post.deleted_date IS NULL AND sp.user_id = :userId', { userId })
       .andWhere(
         `(postOwner.is_private = false OR postOwner.id = :userId
               OR EXISTS (
