@@ -63,6 +63,7 @@ export enum ErrorType {
   InvalidFileType = 'InvalidFileType',
   FileSizeExceeded = 'FileSizeExceeded',
   PostNotToBeCreate = 'PostNotToBeCreate',
+  PostNotToBeUpdate = 'PostNotToBeUpdate',
   PostNotFound = 'PostNotFound',
   PostNotAuthorized = 'PostNotAuthorized',
   AlreadyLikedPost = 'AlreadyLikedPost',

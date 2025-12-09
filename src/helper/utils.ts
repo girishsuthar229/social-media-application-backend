@@ -62,6 +62,8 @@ export function getMessageByCode(messageKey: string): string {
       return Messages.PostMessages.PostsFetched;
     case PostsOperation.POST_CREATED:
       return Messages.PostMessages.PostCreated;
+    case PostsOperation.POST_UPDATED:
+      return Messages.PostMessages.PostUpdated;
     case PostsOperation.POST_DELETED:
       return Messages.PostMessages.PostDeleted;
     case PostsOperation.POST_LIKED:

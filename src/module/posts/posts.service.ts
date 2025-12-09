@@ -178,6 +178,10 @@ export class PostsService {
       .createQueryBuilder('p')
       .leftJoinAndSelect('p.user', 'user')
       .leftJoinAndSelect('user.followers', 'followers')
+      .leftJoinAndSelect('p.comments', 'comment')
+      .leftJoinAndSelect('comment.user', 'commentUser')
+      .leftJoinAndSelect('p.likes', 'like')
+      .leftJoinAndSelect('p.saved_posts', 'saved_post')
       .where('p.deleted_date IS NULL AND p.user_id = :userId', { userId })
       .andWhere(
         `(
@@ -193,10 +197,31 @@ export class PostsService {
     const [posts, total] = await queryBuilder.getManyAndCount();
     const response: UserAllPostsResponseModel[] = posts.map((post) => ({
       post_id: post?.id,
+      content: post?.content,
       image_url: post?.image_url,
       like_count: post?.like_count,
       share_count: post?.share_count,
       comment_count: post?.comment_count,
+      self_comment: post?.self_comment || '',
+      comments: post?.comments?.slice(0, 2).map((comment) => ({
+        id: comment?.id,
+        content: comment?.content,
+        user_id: comment?.user.id,
+        user_name: comment?.user.user_name,
+        created_date: comment?.created_date?.toString() ?? null,
+      })),
+      user: {
+        id: post?.user?.id,
+        user_name: post?.user?.user_name,
+        profile_pic_url: post?.user?.photo_url || '',
+      },
+      created_date: post?.created_date?.toString() ?? null,
+      modified_date: post?.modified_date?.toString() ?? null,
+      is_liked:
+        post.likes?.some((like) => like.user_id === currentUserId) ?? false,
+      is_saved:
+        post.saved_posts?.some((spost) => spost.user_id === currentUserId) ??
+        false,
     }));
 
     return { count: total, rows: response };
@@ -243,12 +268,18 @@ export class PostsService {
   }
 
   async updatePost(
-    id: number,
-    user_id: number,
+    postId: number,
+    currentUserId: number,
     updatePostDto: UpdatePostDto,
-  ): Promise<CreatePost> {
+  ): Promise<void> {
+    if (Number(updatePostDto?.user_id) !== Number(currentUserId)) {
+      throw new NotFoundException({
+        error: ErrorType.PostNotToBeCreate,
+        message: ErrorMessages[ErrorType.PostNotToBeCreate],
+      });
+    }
     const post = await this.postsRepository.findOne({
-      where: { id: id },
+      where: { id: postId },
       relations: ['user'],
     });
     if (!post) {
@@ -257,11 +288,8 @@ export class PostsService {
         message: ErrorMessages[ErrorType.PostNotFound],
       });
     }
-    if (post?.user_id !== user_id) {
-      throw new ForbiddenException('You can only edit your own posts');
-    }
 
-    const { content, comment, post_image, remove_image } = updatePostDto;
+    const { content, comment } = updatePostDto;
 
     if (content !== undefined) {
       post.content = content;
@@ -270,34 +298,7 @@ export class PostsService {
       post.self_comment = comment;
     }
 
-    // Handle image update
-    if (remove_image && post.image_url) {
-      // Delete old image
-      deleteLocalFile(
-        post.image_url,
-        `${UploadFolders.POST_IMAGES}/${user_id}`,
-      );
-      post.image_url = '';
-    }
-
-    if (post_image) {
-      // Delete old image if exists
-      if (post.image_url) {
-        deleteLocalFile(
-          post.image_url,
-          `${UploadFolders.POST_IMAGES}/${user_id}`,
-        );
-      }
-
-      // Upload new image
-      const uploadedPostImageUrl = saveFileLocally(
-        post_image,
-        `${UploadFolders.POST_IMAGES}/${user_id}`,
-      );
-      post.image_url = uploadedPostImageUrl;
-    }
-
-    return this.postsRepository.save(post);
+    await this.postsRepository.save(post);
   }
 
   async deletePost(id: number, user_id: number): Promise<void> {

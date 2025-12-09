@@ -6,8 +6,8 @@ import {
   HttpStatus,
   Param,
   ParseIntPipe,
-  Patch,
   Post,
+  Put,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
@@ -95,25 +95,15 @@ export class PostsController {
     );
   }
 
-  @UseInterceptors(FileInterceptor('post_image'), FileValidationInterceptor)
-  @FileValidation({
-    allowedMimeTypes: [MimeType.PNG, MimeType.JPG, MimeType.JPEG],
-  })
-  @Patch(':id')
+  @Put('/update/:postId')
   async updatePost(
-    @Param('id', ParseIntPipe) id: number,
-    @UploadedFile() post_image: Express.Multer.File,
+    @Param('postId', ParseIntPipe) postId: number,
     @Body() updatePostDto: UpdatePostDto,
     @CurrentUser() user: UserDetails,
-  ): Promise<IResponse<CreatePost>> {
-    const payload = {
-      ...updatePostDto,
-      post_image,
-      updated_by: user.email,
-    };
-    const post = await this.postsService.updatePost(id, user.id, payload);
+  ): Promise<IResponse<null>> {
+    await this.postsService.updatePost(postId, user.id, updatePostDto);
     return ResponseUtil.success(
-      post,
+      null,
       PostsOperation.POST_UPDATED,
       HttpStatus.OK,
     );

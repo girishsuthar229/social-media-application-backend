@@ -30,6 +30,7 @@ export const Messages = {
     PostsFetched: 'Posts fetched successfully',
     PostFetched: 'Post fetched successfully',
     PostCreated: 'Post created successfully.',
+    PostUpdated: 'Post updated successfully.',
     PostDeleted: 'Post Deleted Successfully.',
     PostDetail: 'Post details fetched successfully',
     PostLike: 'Post liked successfully',
@@ -101,6 +102,7 @@ export const ErrorMessages: Record<ErrorType, string> = {
     'File size exceeds the maximum limit of [MAX_SIZE].',
   [ErrorType.PostNotToBeCreate]:
     'The user ID is invalid. Please check your credentials and try again.',
+  [ErrorType.PostNotToBeUpdate]: 'You can only edit your own posts',
   [ErrorType.PostNotFound]: 'Post not found.',
   [ErrorType.PostNotAuthorized]: 'You can only delete your own posts.',
   [ErrorType.AlreadyLikedPost]: 'You already liked this post.',
