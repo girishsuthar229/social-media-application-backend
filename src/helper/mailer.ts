@@ -22,7 +22,7 @@ export class Mailer {
 
   static async sendMail(to: string, subject?: string, html?: string) {
     await this.transporter.sendMail({
-      from: `"Social Media" <${process.env.EMAIL_USER}>`,
+      from: `"Linking You to the World" <${process.env.EMAIL_USER}>`,
       to,
       subject,
       html,

@@ -85,21 +85,21 @@ export class UsersService {
     await this.usersRepository.save(user);
   }
 
-  // private async sendVerificationEmail(
-  //   user: Users,
-  //   email: string,
-  //   generatedOTP: string,
-  //   expiresIn: string,
-  // ) {
-  //   const subject = 'Your Password Reset Verification Code';
-  //   const htmlMessage = `
-  //   <p>Dear ${user.first_name} ${user.last_name},</p>
-  //   <p>You have requested to reset your password.<br>Your verification code is: <strong>${generatedOTP}</strong></p>
-  //   <p>This code is valid for <strong>${expiresIn}</strong> only. For security reasons, please do not share this code with anyone.</p>
-  //   <p>Thank you</p>
-  // `;
-  //   await Mailer.sendMail(email, subject, htmlMessage);
-  // }
+  private async sendVerificationEmail(
+    user: Users,
+    email: string,
+    generatedOTP: string,
+    expiresIn: string,
+  ) {
+    const subject = 'Your Password Reset Verification Code';
+    const htmlMessage = `
+    <p>Dear ${user.first_name} ${user.last_name},</p>
+    <p>You have requested to reset your password.<br>Your verification code is: <strong>${generatedOTP}</strong></p>
+    <p>This code is valid for <strong>${expiresIn}</strong> only. For security reasons, please do not share this code with anyone.</p>
+    <p>Thank you</p>
+  `;
+    await Mailer.sendMail(email, subject, htmlMessage);
+  }
 
   private async decodeToken(token: string): Promise<string> {
     try {
@@ -143,12 +143,12 @@ export class UsersService {
     const otpTimeout =
       (parseInt(SystemConfigKeys.OTP_EXPIRY_TIME.toString()) || 2) * 60 * 1000;
 
-    // await this.sendVerificationEmail(
-    //   user,
-    //   email,
-    //   generatedOTP,
-    //   `${SystemConfigKeys.OTP_EXPIRY_TIME || 2} minutes`,
-    // );
+    await this.sendVerificationEmail(
+      user,
+      email,
+      generatedOTP,
+      `${SystemConfigKeys.OTP_EXPIRY_TIME || 2} minutes`,
+    );
 
     const payload = { userId: user.id, email: user.email };
     const token = this.jwtService.sign(payload, {
