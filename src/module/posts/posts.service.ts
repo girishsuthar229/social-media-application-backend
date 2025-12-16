@@ -8,7 +8,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreatePostDto } from './dto/create-post.dto';
 import { CreatePost } from './entity/post.entity';
-import { deleteLocalFile, saveFileLocally } from 'src/helper/file-upload';
+import { saveFileCloudinary } from 'src/helper/file-upload';
 import { ErrorType, UploadFolders } from 'src/helper/enum';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { PostSortBy, QueryPostDto, SortOrder } from './dto/query-post.dto';
@@ -47,7 +47,7 @@ export class PostsService {
     }
     let uploadedPostImageUrl: string | null = null;
     if (createPostDto.post_image) {
-      uploadedPostImageUrl = saveFileLocally(
+      uploadedPostImageUrl = await saveFileCloudinary(
         createPostDto.post_image,
         `${UploadFolders.POST_IMAGES}/${user_id}`,
       );

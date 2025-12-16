@@ -62,7 +62,7 @@ export class UpdateUserProfileDto {
   mobile_number?: string;
 
   @IsOptional()
-  user_image?: Express.Multer.File;
+  user_image: Express.Multer.File;
 
   @Trim()
   @IsOptional()

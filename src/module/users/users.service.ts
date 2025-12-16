@@ -28,10 +28,11 @@ import { UpdatePasswordDto, VerifyTokenDto } from './dto/user-password.dto';
 import * as bcrypt from 'bcrypt';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserProfileDto } from './dto/update-user.dto';
-import { deleteLocalFile, saveFileLocally } from 'src/helper/file-upload';
+import { deleteLocalFile, saveFileCloudinary } from 'src/helper/file-upload';
 import { GetAllUsersDto, SortOrder, UserSortBy } from './dto/get-all-users.dto';
 import { SearchResponse } from 'src/helper/interface';
 import { FollowingsEnum } from '../follows/entity/follow.entity';
+import { UploadFolders } from 'src/helper/enum';
 
 @Injectable()
 export class UsersService {
@@ -500,9 +501,9 @@ export class UsersService {
 
     let uploadedLogoUrl: string | null = null;
     if (updateUserProfileDto.user_image) {
-      uploadedLogoUrl = saveFileLocally(
+      uploadedLogoUrl = await saveFileCloudinary(
         updateUserProfileDto.user_image,
-        'user-images',
+        `${UploadFolders.USER_IMAGES}`,
       );
 
       if (existingUser.photo_url && uploadedLogoUrl) {
