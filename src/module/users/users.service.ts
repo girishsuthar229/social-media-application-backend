@@ -93,7 +93,7 @@ export class UsersService {
   ) {
     const subject = 'Your Password Reset Verification Code';
     const htmlMessage = `
-    <p>Dear ${user.first_name} ${user.last_name},</p>
+    <p>Dear ${user.first_name ? user.first_name + ' ' + user.last_name : user?.user_name},</p>
     <p>You have requested to reset your password.<br>Your verification code is: <strong>${generatedOTP}</strong></p>
     <p>This code is valid for <strong>${expiresIn}</strong> only. For security reasons, please do not share this code with anyone.</p>
     <p>Thank you</p>

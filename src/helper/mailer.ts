@@ -18,6 +18,7 @@ export class Mailer {
     tls: {
       rejectUnauthorized: false,
     },
+    logger: true,
   });
 
   static async sendMail(to: string, subject?: string, html?: string) {
