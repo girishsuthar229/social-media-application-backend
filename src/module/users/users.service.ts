@@ -14,7 +14,6 @@ import {
   ErrorMessages,
   ErrorType,
   getDateAndTime,
-  Mailer,
   SystemConfigKeys,
 } from 'src/helper';
 import { v4 as uuidv4 } from 'uuid';
@@ -87,22 +86,6 @@ export class UsersService {
 
     await this.usersRepository.save(user);
   }
-
-  // private async sendVerificationEmail(
-  //   user: Users,
-  //   email: string,
-  //   generatedOTP: string,
-  //   expiresIn: string,
-  // ) {
-  //   const subject = 'Your Password Reset Verification Code';
-  //   const htmlMessage = `
-  //   <p>Dear ${user.first_name ? user.first_name + ' ' + user.last_name : user?.user_name},</p>
-  //   <p>You have requested to reset your password.<br>Your verification code is: <strong>${generatedOTP}</strong></p>
-  //   <p>This code is valid for <strong>${expiresIn}</strong> only. For security reasons, please do not share this code with anyone.</p>
-  //   <p>Thank you</p>
-  // `;
-  //   await Mailer.sendMail(email, subject, htmlMessage);
-  // }
 
   private async decodeToken(token: string): Promise<string> {
     try {
@@ -274,6 +257,12 @@ export class UsersService {
         60 *
         1000;
 
+      if (user?.email) {
+        await this.mailerService.sendPasswordResetEmail(
+          user.email,
+          jwtServiceSignToken,
+        );
+      }
       user.otp = null;
       user.otp_expiration_time = null;
       user.is_forgot_token_used = true;

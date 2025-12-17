@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { MailerService as NestMailerService } from '@nestjs-modules/mailer';
 import { Users } from '../users/entity/user.entity';
+import { Mailer } from 'src/helper';
 
 @Injectable()
 export class MailerService {
@@ -47,5 +48,21 @@ export class MailerService {
       <p>Thank you</p>
     `;
     await this.sendMail(email, subject, htmlMessage);
+  }
+
+  async sendVerificationEmailNodemailer(
+    user: Users,
+    email: string,
+    generatedOTP: string,
+    expiresIn: string,
+  ) {
+    const subject = 'Your Password Reset Verification Code';
+    const htmlMessage = `
+    <p>Dear ${user.first_name ? user.first_name + ' ' + user.last_name : user?.user_name},</p>
+    <p>You have requested to reset your password.<br>Your verification code is: <strong>${generatedOTP}</strong></p>
+    <p>This code is valid for <strong>${expiresIn}</strong> only. For security reasons, please do not share this code with anyone.</p>
+    <p>Thank you</p>
+  `;
+    await Mailer.sendMail(email, subject, htmlMessage);
   }
 }

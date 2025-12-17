@@ -16,7 +16,11 @@ import { MailerModule as NestMailerModule } from '@nestjs-modules/mailer';
         tls: {
           rejectUnauthorized: false,
         },
+        connectionTimeout: 60000,
+        greetingTimeout: 30000,
+        socketTimeout: 60000,
       },
+
       defaults: {
         from: `"Linking You to the World" <${process.env.EMAIL_USER}>`,
       },
