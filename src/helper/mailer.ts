@@ -18,10 +18,6 @@ export class Mailer {
     tls: {
       rejectUnauthorized: false,
     },
-    logger: true,
-    connectionTimeout: 60000,
-    greetingTimeout: 30000,
-    socketTimeout: 60000,
   });
 
   static async sendMail(to: string, subject?: string, html?: string) {
