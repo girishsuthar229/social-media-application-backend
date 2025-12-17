@@ -18,14 +18,23 @@ export class Mailer {
     tls: {
       rejectUnauthorized: false,
     },
+    connectionTimeout: 60000,
+    greetingTimeout: 30000,
+    socketTimeout: 60000,
   });
 
   static async sendMail(to: string, subject?: string, html?: string) {
-    await this.transporter.sendMail({
-      from: `"Linking You to the World" <${process.env.EMAIL_USER}>`,
-      to,
-      subject,
-      html,
-    });
+    try {
+      const info = await this.transporter.sendMail({
+        from: `"Linking You to the World" <${process.env.EMAIL_USER}>`,
+        to,
+        subject,
+        html,
+      });
+      console.log('Email sent: ', info.response);
+    } catch (error) {
+      console.error('Error sending email: ', error);
+      throw error;
+    }
   }
 }

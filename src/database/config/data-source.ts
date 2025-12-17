@@ -16,9 +16,6 @@ if (process.env.DATABASE_URL) {
       __dirname + '/../seeders/**/*.ts',
     ],
     synchronize: process.env.DB_SYNC === 'true',
-    ssl: {
-      rejectUnauthorized: false,
-    },
   };
 } else {
   dataSourceOptions = {
