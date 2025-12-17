@@ -5,7 +5,7 @@ dotenv.config();
 
 export class Mailer {
   private static transporter = nodemailer.createTransport({
-    service: 'smtp.gmail.com',
+    host: 'smtp.gmail.com',
     port: 587,
     secure: false,
     auth: {
