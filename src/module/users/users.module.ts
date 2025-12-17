@@ -7,6 +7,7 @@ import { Users } from './entity/user.entity';
 import { RolesModule } from '../roles/roles.module';
 import { PostsModule } from '../posts/posts.module';
 import { CreatePost } from '../posts/entity/post.entity';
+import { MailerModule } from '../mailer/mailer.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { CreatePost } from '../posts/entity/post.entity';
     TypeOrmModule.forFeature([Users, CreatePost]),
     RolesModule,
     PostsModule,
+    MailerModule,
   ],
   controllers: [UsersController],
   providers: [UsersService],
