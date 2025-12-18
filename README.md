@@ -21,7 +21,7 @@ Clean modular NestJS architecture
 https://github.com/girishsuthar229/social-media-application-frontend
 
 👉 Live Frontend URL:
-https://social-media-application-frontend.onrender.com/sign-in
+https://linking-you-to-the-world.onrender.com/sign-in
 
 This backend exposes APIs consumed by the above frontend.
 
@@ -82,7 +82,7 @@ Component	Technology	Repository / URL
 
 Frontend	Next.js + TypeScript  And Backend	NestJS + PostgreSQL
 
-This repository : Live Frontend	Render	https://social-media-application-frontend.onrender.com/sign-in
+This repository : Live Frontend	Render	https://linking-you-to-the-world.onrender.com/sign-in
 
 👉 Database URL:
 https://dashboard.render.com/d/dpg-d4t8rs4hg0os73col840-a
