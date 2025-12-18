@@ -80,10 +80,12 @@ NestJS Deployment Docs : https://docs.nestjs.com/deployment
 🔗 Project Connections
 Component	Technology	Repository / URL
 
-Frontend	Next.js + TypeScript :	https://github.com/girishsuthar229/social-media-application-frontend
+Frontend	Next.js + TypeScript  And Backend	NestJS + PostgreSQL
 
+This repository : Live Frontend	Render	https://social-media-application-frontend.onrender.com/sign-in
 
-Backend	NestJS + PostgreSQL	This repository : Live Frontend	Render	https://social-media-application-frontend.onrender.com/sign-in
+👉 Database URL:
+https://dashboard.render.com/d/dpg-d4t8rs4hg0os73col840-a
 
 
 👨‍💻 Author
