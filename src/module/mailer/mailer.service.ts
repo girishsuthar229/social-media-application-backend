@@ -32,8 +32,8 @@ export class MailerService {
       <p><a href="${resetLink}">Reset your password</a></p>
       <p>If you did not request a password reset, please ignore this email.</p>
     `;
-    await this.sendMail(to, subject, htmlMessage);
-    // await Mailer.sendMail(to, subject, htmlMessage);
+    // await this.sendMail(to, subject, htmlMessage);
+    await Mailer.sendMail(to, subject, htmlMessage);
   }
 
   async sendVerificationEmail(
@@ -49,7 +49,7 @@ export class MailerService {
       <p>This code is valid for <strong>${expiresIn}</strong> only. For security reasons, please do not share this code with anyone.</p>
       <p>Thank you</p>
     `;
-    await this.sendMail(email, subject, htmlMessage);
-    // await Mailer.sendMail(email, subject, htmlMessage);
+    // await this.sendMail(email, subject, htmlMessage);
+    await Mailer.sendMail(email, subject, htmlMessage);
   }
 }
