@@ -100,6 +100,7 @@ export class PostsService {
     queryBuilder.addOrderBy(`p.${sortBy}`, sortOrder);
     queryBuilder.take(limit).skip(offset);
     const [userPosts, total] = await queryBuilder.getManyAndCount();
+    console.log('userPosts', userPosts);
     const response: GetAllPostsReponseModel[] = userPosts.map((post) => {
       return {
         post_id: post?.id,
@@ -109,13 +110,16 @@ export class PostsService {
         share_count: post?.share_count,
         comment_count: post?.comment_count,
         self_comment: post?.self_comment || '',
-        comments: post?.comments?.slice(0, 2).map((comment) => ({
-          id: comment?.id,
-          content: comment?.content,
-          user_id: comment?.user.id,
-          user_name: comment?.user.user_name,
-          created_date: comment?.created_date?.toString() ?? null,
-        })),
+        comments: post?.comments
+          ?.filter((comment) => comment?.deleted_date === null)
+          ?.slice(0, 3)
+          .map((comment) => ({
+            id: comment?.id,
+            content: comment?.content,
+            user_id: comment?.user.id,
+            user_name: comment?.user.user_name,
+            created_date: comment?.created_date?.toString() ?? null,
+          })),
         user: {
           id: post?.user?.id,
           user_name: post?.user?.user_name,

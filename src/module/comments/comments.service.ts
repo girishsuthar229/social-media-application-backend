@@ -61,7 +61,7 @@ export class CommentsService {
       .createQueryBuilder('c')
       .leftJoinAndSelect('c.user', 'user')
       .leftJoinAndSelect('user.followings', 'followings')
-      .where('c.post_id = :post_id', { post_id })
+      .where('c.deleted_date IS NULL AND c.post_id = :post_id', { post_id })
       .andWhere('user.deleted_date IS NULL');
 
     const [commentUsers] = await queryBuilder.getManyAndCount();
