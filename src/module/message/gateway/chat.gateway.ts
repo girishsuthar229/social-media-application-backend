@@ -14,7 +14,7 @@ dotenv.config();
 
 @WebSocketGateway({
   cors: {
-    origin: process.env.FRONTEND_HOST,
+    origin: '*',
   },
 })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
