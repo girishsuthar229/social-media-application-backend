@@ -8,9 +8,6 @@ import {
 import { Server, Socket } from 'socket.io';
 import { UserMessageListModel } from '../interface/message.interface';
 import { NewUserNotification } from 'src/module/users/interface/users.interface';
-import * as dotenv from 'dotenv';
-
-dotenv.config();
 
 @WebSocketGateway({
   cors: {
