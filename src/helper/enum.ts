@@ -89,6 +89,10 @@ export enum RolesOperation {
   FETCH_ROLE_PERMISSIONS = 'FETCH_ROLE_PERMISSIONS',
   DELETE = 'ROLE_DELETE',
 }
+export enum MessageOperation {
+  MESSAGE_CREATE = 'MESSAGE_CREATE',
+  MESSAGE_FETCHED = 'MESSAGE_FETCHED',
+}
 
 export enum UsersOperation {
   LOGIN = 'USER_LOGIN',

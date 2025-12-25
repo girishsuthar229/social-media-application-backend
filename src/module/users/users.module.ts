@@ -8,6 +8,7 @@ import { RolesModule } from '../roles/roles.module';
 import { PostsModule } from '../posts/posts.module';
 import { CreatePost } from '../posts/entity/post.entity';
 import { MailerModule } from '../mailer/mailer.module';
+import { MessageModule } from '../message/message.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { MailerModule } from '../mailer/mailer.module';
     RolesModule,
     PostsModule,
     MailerModule,
+    MessageModule,
   ],
   controllers: [UsersController],
   providers: [UsersService],

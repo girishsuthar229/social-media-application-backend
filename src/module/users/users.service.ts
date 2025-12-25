@@ -20,6 +20,7 @@ import { v4 as uuidv4 } from 'uuid';
 import {
   AnotherUserDetailResponse,
   DecodedTokenPayload,
+  NewUserNotification,
   UserListResponseModel,
   UserProfileDetailsModel,
 } from './interface/users.interface';
@@ -33,6 +34,7 @@ import { SearchResponse } from 'src/helper/interface';
 import { FollowingsEnum } from '../follows/entity/follow.entity';
 import { UploadFolders } from 'src/helper/enum';
 import { MailerService } from '../mailer/mailer.service';
+import { ChatGateway } from '../message/gateway/chat.gateway';
 
 @Injectable()
 export class UsersService {
@@ -41,6 +43,7 @@ export class UsersService {
     private usersRepository: Repository<Users>,
     private readonly rolesService: RolesService,
     private readonly mailerService: MailerService,
+    private readonly chatGateway: ChatGateway,
     private jwtService: JwtService,
   ) {}
 
@@ -84,7 +87,17 @@ export class UsersService {
       role_id: role_id ? role_id : 2,
     });
 
-    await this.usersRepository.save(user);
+    // const createUser = await this.usersRepository.save(user);
+    // const response: NewUserNotification = {
+    //   id: createUser.id,
+    //   user_name: createUser?.user_name,
+    //   first_name: createUser?.first_name || null,
+    //   last_name: createUser?.first_name || null,
+    //   bio: createUser?.first_name || null,
+    //   photo_url: createUser?.first_name || null,
+    // };
+    // //socket
+    // await this.chatGateway.notifyNewUser(response);
   }
 
   private async decodeToken(token: string): Promise<string> {

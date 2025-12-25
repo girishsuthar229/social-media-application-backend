@@ -60,3 +60,11 @@ export class AnotherUserDetailResponse {
   following_count?: number;
   post_count?: number;
 }
+export class NewUserNotification {
+  id: number;
+  user_name: string;
+  first_name: string | null;
+  last_name: string | null;
+  bio: string | null;
+  photo_url: string | null;
+}

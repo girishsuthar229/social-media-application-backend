@@ -1,5 +1,6 @@
 import {
   FollowOperation,
+  MessageOperation,
   PostsOperation,
   RolesOperation,
   UsersOperation,
@@ -97,6 +98,11 @@ export function getMessageByCode(messageKey: string): string {
       return Messages.FollowMessage.followers;
     case FollowOperation.FOLLOWING_FETCHED:
       return Messages.FollowMessage.followings;
+
+    case MessageOperation.MESSAGE_CREATE:
+      return Messages.SendUserMessages.createMessage;
+    case MessageOperation.MESSAGE_FETCHED:
+      return Messages.SendUserMessages.FetchedMessage;
 
     default:
       return Messages.InternalServerError;

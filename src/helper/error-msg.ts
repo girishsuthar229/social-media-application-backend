@@ -50,6 +50,10 @@ export const Messages = {
     followers: 'followers fetched successfully',
     followings: 'followings fetched successfully',
   },
+  SendUserMessages: {
+    createMessage: 'message send successfully.',
+    FetchedMessage: 'message list fetched successfully',
+  },
 };
 export const ErrorMessages: Record<ErrorType, string> = {
   [ErrorType.NotFound]:
