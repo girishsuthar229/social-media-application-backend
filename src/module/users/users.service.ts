@@ -87,7 +87,7 @@ export class UsersService {
       role_id: role_id ? role_id : 2,
     });
 
-    // const createUser = await this.usersRepository.save(user);
+    const createUser = await this.usersRepository.save(user);
     // const response: NewUserNotification = {
     //   id: createUser.id,
     //   user_name: createUser?.user_name,
