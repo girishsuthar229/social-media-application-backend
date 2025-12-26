@@ -100,7 +100,7 @@ export class PostsService {
     queryBuilder.addOrderBy(`p.${sortBy}`, sortOrder);
     queryBuilder.take(limit).skip(offset);
     const [userPosts, total] = await queryBuilder.getManyAndCount();
-    console.log('userPosts', userPosts);
+
     const response: GetAllPostsReponseModel[] = userPosts.map((post) => {
       return {
         post_id: post?.id,

@@ -1,19 +1,14 @@
-import {
-  Body,
-  Controller,
-  Get,
-  HttpStatus,
-  Param,
-  Post,
-  Query,
-} from '@nestjs/common';
+import { Body, Controller, Get, HttpStatus, Param, Post } from '@nestjs/common';
 import { MessageService } from './message.service';
 import { CurrentUser } from 'src/decorators';
-import { IResponse, UserDetails, UsersOperation } from 'src/helper';
+import { IResponse, UserDetails } from 'src/helper';
 import { SearchResponse } from 'src/helper/interface';
 import { ResponseUtil } from 'src/interceptors';
 import { GetAllMsgUsersDto } from './dto/get-all-msg-user.dto';
-import { MsgUserListResponseModel } from './interface/message.interface';
+import {
+  MsgUserListResponseModel,
+  UserMessageListModel,
+} from './interface/message.interface';
 import { MessageOperation } from 'src/helper/enum';
 import { NewMessageDto } from './dto/new-msg-dto';
 
@@ -40,10 +35,10 @@ export class MessageController {
   @Post('/send-message')
   async userSendMessageServices(
     @Body() newMessageDto: NewMessageDto,
-  ): Promise<IResponse<null>> {
-    await this.messageService.userSendMessage(newMessageDto);
+  ): Promise<IResponse<UserMessageListModel>> {
+    const data = await this.messageService.userSendMessage(newMessageDto);
     return ResponseUtil.success(
-      null,
+      data,
       MessageOperation.MESSAGE_CREATE,
       HttpStatus.OK,
     );

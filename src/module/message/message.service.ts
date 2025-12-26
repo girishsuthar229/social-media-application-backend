@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { IsNull, Repository } from 'typeorm';
+import { In, IsNull, Repository } from 'typeorm';
 import { Message } from './entity/message.entity';
 import { NewMessageDto } from './dto/new-msg-dto';
 import { Users } from '../users/entity/user.entity';
@@ -26,23 +26,48 @@ export class MessageService {
     private readonly usersRepository: Repository<Users>,
   ) {}
 
-  async userSendMessage(newMessageDto: NewMessageDto): Promise<void> {
+  async userSendMessage(
+    newMessageDto: NewMessageDto,
+  ): Promise<UserMessageListModel> {
     const newMessage = this.messageRepository.create({
       receiver_id: newMessageDto.receiver_id,
       sender_id: newMessageDto.sender_id,
       message: newMessageDto.message,
     });
 
-    const savedMessage = await this.messageRepository.save(newMessage);
+    await this.messageRepository.save(newMessage);
+    const savedMessage = await this.messageRepository
+      .createQueryBuilder('m')
+      .leftJoinAndSelect('m.sender', 'sender')
+      .leftJoinAndSelect('m.receiver', 'receiver')
+      .where('m.id = :id', { id: newMessage.id })
+      .getOne();
+
+    const sender = savedMessage?.sender;
+    const receiver = savedMessage?.receiver;
     const response: UserMessageListModel = {
-      id: savedMessage.id,
-      sender_id: savedMessage.sender_id,
-      receiver_id: savedMessage.receiver_id,
-      message: savedMessage.message,
-      created_at: savedMessage.created_at.toString(),
+      id: savedMessage?.id || 0,
+      message: savedMessage?.message || '',
+      created_date: savedMessage?.created_at.toString() || '',
+      modified_date: savedMessage?.updated_at?.toString() || '',
+      sender: {
+        id: sender?.id || 0,
+        user_name: sender?.user_name || '',
+        first_name: sender?.first_name || null,
+        last_name: sender?.last_name || null,
+        photo_url: sender?.photo_url || null,
+      },
+      receiver: {
+        id: receiver?.id || 0,
+        user_name: receiver?.user_name || '',
+        first_name: receiver?.first_name || null,
+        last_name: receiver?.last_name || null,
+        photo_url: receiver?.photo_url || null,
+      },
     };
     //socket
-    await this.chatGateway.handleMessage(response);
+    await this.chatGateway.handleMessageSocket(response);
+    return response;
   }
 
   async getChatBetweenUsers(
@@ -55,15 +80,39 @@ export class MessageService {
         { sender_id: user2, receiver_id: user1, deleted_at: IsNull() },
       ],
       order: { created_at: 'ASC' },
+      relations: ['sender', 'receiver'],
     });
 
-    const response: UserMessageListModel[] = messages.map((message) => ({
-      id: message.id,
-      sender_id: message.sender_id,
-      receiver_id: message.receiver_id,
-      message: message.message,
-      created_at: message.created_at.toString(),
-    }));
+    const messageIds = messages.map((message) => message.id);
+    await this.messageRepository.update(
+      { id: In(messageIds) },
+      { is_read: true },
+    );
+
+    const response: UserMessageListModel[] = messages.map((message) => {
+      const sender = message.sender;
+      const receiver = message.receiver;
+      return {
+        id: message.id,
+        message: message.message,
+        created_date: message.created_at.toString(),
+        modified_date: message?.updated_at?.toString() || '',
+        sender: {
+          id: sender?.id || 0,
+          user_name: sender?.user_name || '',
+          first_name: sender?.first_name || null,
+          last_name: sender?.last_name || null,
+          photo_url: sender?.photo_url || null,
+        },
+        receiver: {
+          id: receiver?.id || 0,
+          user_name: receiver?.user_name || '',
+          first_name: receiver?.first_name || null,
+          last_name: receiver?.last_name || null,
+          photo_url: receiver?.photo_url || null,
+        },
+      };
+    });
 
     return response;
   }
@@ -78,7 +127,6 @@ export class MessageService {
       searchName,
       sortBy = UserSortBy.CREATED_AT,
       sortOrder = SortOrder.DESC,
-      is_read,
     } = queryDto;
 
     const queryBuilder = this.messageRepository
@@ -121,24 +169,43 @@ export class MessageService {
         );
       usersBuilder.take(limit).skip(offset);
       const [users, total] = await usersBuilder.getManyAndCount();
-      const rows: MsgUserListResponseModel[] = users.map((user) => {
-        return {
-          id: user.id,
-          user_name: user.user_name,
-          first_name: user.first_name ?? '',
-          last_name: user.last_name ?? '',
-          email: user.email ?? '',
-          bio: user.bio ?? null,
-          photo_url: user.photo_url ?? '',
-          created_date: user.created_date.toString(),
-          modified_date: user.modified_date?.toString() ?? null,
-        };
-      });
+
+      const rows: MsgUserListResponseModel[] = await Promise.all(
+        users.map(async (user) => {
+          const lastMessage = await this.messageRepository
+            .createQueryBuilder('m')
+            .where(
+              '(m.sender_id = :userId AND m.receiver_id = :currentUserId) OR (m.sender_id = :currentUserId AND m.receiver_id = :userId)',
+              {
+                userId: user.id,
+                currentUserId,
+              },
+            )
+            .orderBy('m.created_at', 'DESC')
+            .getOne();
+
+          return {
+            id: user.id,
+            user_name: user.user_name,
+            first_name: user.first_name ?? '',
+            last_name: user.last_name ?? '',
+            photo_url: user.photo_url ?? '',
+            message: {
+              id: lastMessage?.id ?? 0,
+              sender_id: lastMessage?.sender_id ?? 0,
+              receiver_id: lastMessage?.receiver_id ?? 0,
+              last_message: lastMessage?.message ?? '',
+              created_date: lastMessage?.created_at.toString() ?? '',
+              modified_date: lastMessage?.updated_at?.toString() ?? '',
+              is_read: lastMessage?.is_read,
+            },
+          };
+        }),
+      );
 
       return { count: total, rows };
     }
 
-    // If usersSet has users, return those users from the message set
     if (usersSet.size === 0) {
       return { count: total, rows: [] };
     }
@@ -147,19 +214,38 @@ export class MessageService {
       .createQueryBuilder('u')
       .where('u.id IN (:...userIds)', { userIds: Array.from(usersSet) })
       .getMany();
-    const rows: MsgUserListResponseModel[] = users.map((user) => {
-      return {
-        id: user.id,
-        user_name: user.user_name,
-        first_name: user.first_name ?? '',
-        last_name: user.last_name ?? '',
-        email: user.email ?? '',
-        bio: user.bio ?? null,
-        photo_url: user.photo_url ?? '',
-        created_date: user.created_date.toString(),
-        modified_date: user.modified_date?.toString() ?? null,
-      };
-    });
+    const rows: MsgUserListResponseModel[] = await Promise.all(
+      users.map(async (user) => {
+        const lastMessage = await this.messageRepository
+          .createQueryBuilder('m')
+          .where(
+            '(m.sender_id = :userId AND m.receiver_id = :currentUserId) OR (m.sender_id = :currentUserId AND m.receiver_id = :userId)',
+            {
+              userId: user.id,
+              currentUserId,
+            },
+          )
+          .orderBy('m.created_at', 'DESC')
+          .getOne();
+
+        return {
+          id: user.id,
+          user_name: user.user_name,
+          first_name: user.first_name ?? '',
+          last_name: user.last_name ?? '',
+          photo_url: user.photo_url ?? '',
+          message: {
+            id: lastMessage?.id ?? 0,
+            sender_id: lastMessage?.sender_id ?? 0,
+            receiver_id: lastMessage?.receiver_id ?? 0,
+            last_message: lastMessage?.message ?? '',
+            created_date: lastMessage?.created_at.toString() ?? '',
+            modified_date: lastMessage?.updated_at?.toString() ?? '',
+            is_read: lastMessage?.is_read,
+          },
+        };
+      }),
+    );
 
     return { count: total, rows };
   }

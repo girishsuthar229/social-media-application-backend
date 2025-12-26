@@ -38,25 +38,16 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   //Chat message event
   @SubscribeMessage('send_message')
-  async handleMessage(newMessage: UserMessageListModel) {
+  async handleMessageSocket(newMessage: UserMessageListModel) {
     try {
       this.server
-        .to(`user_${newMessage.receiver_id}`)
+        .to(`user_${newMessage.receiver.id}`)
         .emit('receive_message', newMessage);
     } catch (error) {
       console.error('Error sending message:', error);
     }
   }
 
-  async handleMessageSocket(newMessage: UserMessageListModel) {
-    try {
-      this.server
-        .to(`user_${newMessage.receiver_id}`)
-        .emit('receive_message', newMessage);
-    } catch (error) {
-      console.error('Error sending message:', error);
-    }
-  }
   //New user notification
   async notifyNewUser(user: NewUserNotification) {
     console.log('notifyNewUser before', user);

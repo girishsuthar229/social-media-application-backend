@@ -3,17 +3,35 @@ export class MsgUserListResponseModel {
   user_name: string;
   first_name: string;
   last_name: string;
-  email: string;
-  bio: string | null;
   photo_url: string;
-  created_date: string;
-  modified_date: string | null;
+  message: {
+    id: number;
+    sender_id: number;
+    receiver_id: number;
+    last_message: string;
+    created_date: string;
+    modified_date: string | null;
+    is_read?: boolean;
+  };
 }
 
-export class UserMessageListModel {
+export interface UserMessageListModel {
   id: number;
-  sender_id: number;
-  receiver_id: number;
   message: string;
-  created_at: string;
+  created_date: string;
+  modified_date?: string;
+  sender: {
+    id: number;
+    user_name: string;
+    first_name: string | null;
+    last_name: string | null;
+    photo_url: string | null;
+  };
+  receiver: {
+    id: number;
+    user_name: string;
+    first_name: string | null;
+    last_name: string | null;
+    photo_url?: string | null;
+  };
 }

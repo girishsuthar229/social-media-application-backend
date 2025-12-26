@@ -1,11 +1,4 @@
-import {
-  IsOptional,
-  IsInt,
-  IsString,
-  IsEnum,
-  IsBoolean,
-} from 'class-validator';
-import { Type, Transform } from 'class-transformer';
+import { IsOptional, IsString, IsEnum } from 'class-validator';
 import { BaseFilterDto } from 'src/helper/interface';
 
 export enum UserSortBy {
@@ -30,9 +23,4 @@ export class GetAllMsgUsersDto extends BaseFilterDto {
   @IsOptional()
   @IsEnum(SortOrder)
   sortOrder?: SortOrder = SortOrder.DESC;
-
-  @IsOptional()
-  @Transform(({ value }) => value === 'true' || value === true)
-  @IsBoolean()
-  is_read?: boolean;
 }
