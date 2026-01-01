@@ -142,12 +142,12 @@ export class UsersService {
     const otpTimeout =
       (parseInt(SystemConfigKeys.OTP_EXPIRY_TIME.toString()) || 2) * 60 * 1000;
 
-    // await this.mailerService.sendVerificationEmail(
-    //   user,
-    //   email,
-    //   generatedOTP,
-    //   `${SystemConfigKeys.OTP_EXPIRY_TIME || 2} minutes`,
-    // );
+    await this.mailerService.sendVerificationEmail(
+      user,
+      email,
+      generatedOTP,
+      `${SystemConfigKeys.OTP_EXPIRY_TIME || 2} minutes`,
+    );
 
     const payload = { userId: user.id, email: user.email };
     const token = this.jwtService.sign(payload, {
