@@ -14,7 +14,7 @@ import {
   MsgUserListResponseModel,
   UserMessageListModel,
 } from './interface/message.interface';
-import { ChatGateway } from './gateway/chat.gateway';
+import { ChatGateway } from '../mailer/gateway/chat.gateway';
 
 @Injectable()
 export class MessageService {

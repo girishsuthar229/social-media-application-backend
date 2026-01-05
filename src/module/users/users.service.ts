@@ -34,7 +34,7 @@ import { SearchResponse } from 'src/helper/interface';
 import { FollowingsEnum } from '../follows/entity/follow.entity';
 import { UploadFolders } from 'src/helper/enum';
 import { MailerService } from '../mailer/mailer.service';
-import { ChatGateway } from '../message/gateway/chat.gateway';
+import { ChatGateway } from '../mailer/gateway/chat.gateway';
 
 @Injectable()
 export class UsersService {
@@ -88,16 +88,16 @@ export class UsersService {
     });
 
     const createUser = await this.usersRepository.save(user);
-    // const response: NewUserNotification = {
-    //   id: createUser.id,
-    //   user_name: createUser?.user_name,
-    //   first_name: createUser?.first_name || null,
-    //   last_name: createUser?.first_name || null,
-    //   bio: createUser?.first_name || null,
-    //   photo_url: createUser?.first_name || null,
-    // };
-    // //socket
-    // await this.chatGateway.notifyNewUser(response);
+    const response: NewUserNotification = {
+      id: createUser.id,
+      user_name: createUser?.user_name,
+      first_name: createUser?.first_name || null,
+      last_name: createUser?.first_name || null,
+      bio: createUser?.first_name || null,
+      photo_url: createUser?.first_name || null,
+    };
+    //socket
+    await this.chatGateway.notifyNewUser(response);
   }
 
   private async decodeToken(token: string): Promise<string> {
@@ -270,12 +270,12 @@ export class UsersService {
         60 *
         1000;
 
-      if (user?.email) {
-        await this.mailerService.sendPasswordResetEmail(
-          user.email,
-          jwtServiceSignToken,
-        );
-      }
+      // if (user?.email) {
+      //   await this.mailerService.sendPasswordResetEmail(
+      //     user.email,
+      //     jwtServiceSignToken,
+      //   );
+      // }
       user.otp = null;
       user.otp_expiration_time = null;
       user.is_forgot_token_used = true;

@@ -6,7 +6,7 @@ import {
   OnGatewayDisconnect,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { UserMessageListModel } from '../interface/message.interface';
+import { UserMessageListModel } from '../../message/interface/message.interface';
 import { NewUserNotification } from 'src/module/users/interface/users.interface';
 
 @WebSocketGateway({
@@ -50,11 +50,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   //New user notification
   async notifyNewUser(user: NewUserNotification) {
-    console.log('notifyNewUser before', user);
     try {
-      this.server.emit('new_user_created', {
-        user,
-      });
+      this.server.emit('new_user_created', user);
     } catch (error) {
       console.error('Error new user created:', error);
     }
