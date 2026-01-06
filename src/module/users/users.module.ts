@@ -9,6 +9,7 @@ import { PostsModule } from '../posts/posts.module';
 import { CreatePost } from '../posts/entity/post.entity';
 import { MailerModule } from '../mailer/mailer.module';
 import { MessageModule } from '../message/message.module';
+import { ChatGateway } from '../mailer/gateway/chat.gateway';
 
 @Module({
   imports: [
@@ -23,7 +24,7 @@ import { MessageModule } from '../message/message.module';
     MessageModule,
   ],
   controllers: [UsersController],
-  providers: [UsersService],
-  exports: [UsersService],
+  providers: [UsersService, ChatGateway],
+  exports: [UsersService, ChatGateway],
 })
 export class UsersModule {}

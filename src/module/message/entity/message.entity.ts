@@ -1,3 +1,4 @@
+import { MessageStatus } from 'src/helper/enum';
 import { Users } from 'src/module/users/entity/user.entity';
 import {
   Entity,
@@ -26,6 +27,13 @@ export class Message {
 
   @Column({ default: false })
   is_read: boolean;
+
+  @Column({
+    type: 'enum',
+    enum: MessageStatus,
+    default: MessageStatus.SENT,
+  })
+  status: MessageStatus;
 
   @CreateDateColumn({ name: 'created_at' })
   created_at: Date;

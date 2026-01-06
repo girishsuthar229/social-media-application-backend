@@ -101,6 +101,8 @@ export function getMessageByCode(messageKey: string): string {
 
     case MessageOperation.MESSAGE_CREATE:
       return Messages.SendUserMessages.createMessage;
+    case MessageOperation.MESSAGE_READ:
+      return Messages.SendUserMessages.readMessage;
     case MessageOperation.MESSAGE_FETCHED:
       return Messages.SendUserMessages.FetchedMessage;
 

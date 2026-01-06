@@ -24,6 +24,12 @@ export enum SystemConfigKeys {
   PSW_EXPIRY_TIME = 2,
 }
 
+export enum MessageStatus {
+  SENT = 'sent',
+  DELIVERED = 'delivered',
+  SEEN = 'seen',
+}
+
 export enum ErrorType {
   NotFound = 'NotFound',
   BadRequest = 'BadRequest',
@@ -92,6 +98,7 @@ export enum RolesOperation {
 export enum MessageOperation {
   MESSAGE_CREATE = 'MESSAGE_CREATE',
   MESSAGE_FETCHED = 'MESSAGE_FETCHED',
+  MESSAGE_READ = 'MESSAGE_READ',
 }
 
 export enum UsersOperation {

@@ -13,13 +13,13 @@ import {
 import {
   MsgUserListResponseModel,
   UserMessageListModel,
+  UserReadMessageModel,
 } from './interface/message.interface';
-import { ChatGateway } from '../mailer/gateway/chat.gateway';
+import { MessageStatus } from 'src/helper/enum';
 
 @Injectable()
 export class MessageService {
   constructor(
-    private readonly chatGateway: ChatGateway,
     @InjectRepository(Message)
     private readonly messageRepository: Repository<Message>,
     @InjectRepository(Users)
@@ -50,6 +50,8 @@ export class MessageService {
       message: savedMessage?.message || '',
       created_date: savedMessage?.created_at.toString() || '',
       modified_date: savedMessage?.updated_at?.toString() || '',
+      status: savedMessage?.status || MessageStatus.SENT,
+      is_read: savedMessage?.is_read || false,
       sender: {
         id: sender?.id || 0,
         user_name: sender?.user_name || '',
@@ -65,29 +67,75 @@ export class MessageService {
         photo_url: receiver?.photo_url || null,
       },
     };
-    //socket
-    await this.chatGateway.handleMessageSocket(response);
     return response;
   }
 
-  async getChatBetweenUsers(
-    user1: number,
-    user2: number,
-  ): Promise<UserMessageListModel[]> {
+  async userMessageRead(
+    readMessage: UserReadMessageModel,
+  ): Promise<UserMessageListModel[] | null> {
     const messages = await this.messageRepository.find({
-      where: [
-        { sender_id: user1, receiver_id: user2, deleted_at: IsNull() },
-        { sender_id: user2, receiver_id: user1, deleted_at: IsNull() },
-      ],
+      where: {
+        sender_id: readMessage?.selected_user_id,
+        receiver_id: readMessage?.current_user_id,
+        deleted_at: IsNull(),
+        is_read: false,
+        status: MessageStatus.SENT || MessageStatus.DELIVERED,
+      },
       order: { created_at: 'ASC' },
       relations: ['sender', 'receiver'],
     });
 
-    const messageIds = messages.map((message) => message.id);
-    await this.messageRepository.update(
-      { id: In(messageIds) },
-      { is_read: true },
-    );
+    if (messages.length > 0) {
+      const messageIds = messages.map((message) => message.id);
+      await this.messageRepository.update(
+        { id: In(messageIds) },
+        { is_read: true, status: MessageStatus.SEEN },
+      );
+
+      const msgResponse: UserMessageListModel[] = messages?.map((message) => {
+        const sender = message?.sender;
+        const receiver = message?.receiver;
+        return {
+          id: message?.id || 0,
+          message: message?.message || '',
+          created_date: message?.created_at.toString() || '',
+          modified_date: message?.updated_at?.toString() || '',
+          status: MessageStatus.SEEN,
+          is_read: true,
+          sender: {
+            id: sender?.id || 0,
+            user_name: sender?.user_name || '',
+            first_name: sender?.first_name || null,
+            last_name: sender?.last_name || null,
+            photo_url: sender?.photo_url || null,
+          },
+          receiver: {
+            id: receiver?.id || 0,
+            user_name: receiver?.user_name || '',
+            first_name: receiver?.first_name || null,
+            last_name: receiver?.last_name || null,
+            photo_url: receiver?.photo_url || null,
+          },
+        };
+      });
+
+      return msgResponse || [];
+    }
+    return null;
+  }
+
+  async getChatBetweenUsers(
+    user1: number,
+    currentUserId: number,
+  ): Promise<UserMessageListModel[]> {
+    const messages = await this.messageRepository.find({
+      where: [
+        { sender_id: user1, receiver_id: currentUserId, deleted_at: IsNull() },
+        { sender_id: currentUserId, receiver_id: user1, deleted_at: IsNull() },
+      ],
+      order: { created_at: 'ASC' },
+      relations: ['sender', 'receiver'],
+    });
 
     const response: UserMessageListModel[] = messages.map((message) => {
       const sender = message.sender;
@@ -97,6 +145,8 @@ export class MessageService {
         message: message.message,
         created_date: message.created_at.toString(),
         modified_date: message?.updated_at?.toString() || '',
+        status: message?.status,
+        is_read: message?.is_read,
         sender: {
           id: sender?.id || 0,
           user_name: sender?.user_name || '',
@@ -194,6 +244,7 @@ export class MessageService {
               id: lastMessage?.id ?? 0,
               sender_id: lastMessage?.sender_id ?? 0,
               receiver_id: lastMessage?.receiver_id ?? 0,
+              status: lastMessage?.status ?? '',
               last_message: lastMessage?.message ?? '',
               created_date: lastMessage?.created_at.toString() ?? '',
               modified_date: lastMessage?.updated_at?.toString() ?? '',
@@ -241,6 +292,7 @@ export class MessageService {
             last_message: lastMessage?.message ?? '',
             created_date: lastMessage?.created_at.toString() ?? '',
             modified_date: lastMessage?.updated_at?.toString() ?? '',
+            status: lastMessage?.status ?? '',
             is_read: lastMessage?.is_read,
           },
         };

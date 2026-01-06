@@ -52,6 +52,7 @@ export const Messages = {
   },
   SendUserMessages: {
     createMessage: 'message send successfully.',
+    readMessage: 'message read by user.',
     FetchedMessage: 'message list fetched successfully',
   },
 };
