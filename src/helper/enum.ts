@@ -104,6 +104,7 @@ export enum MessageOperation {
 export enum UsersOperation {
   LOGIN = 'USER_LOGIN',
   OTP_SENT = 'OTP_SENT',
+  OTP_VERIFICATION = 'OTP_VERIFICATION',
   FETCHED = 'USER_FETCHED',
   UPDATE = 'USER_UPDATE',
   RESET_PASSWORD = 'RESET_PASSWORD',

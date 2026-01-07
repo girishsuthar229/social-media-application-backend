@@ -15,6 +15,7 @@ export const Messages = {
   UserMessages: {
     Login: 'Login successful',
     Otp_Sent: 'Verification OTP sent successfully',
+    Otp_Verifiy: 'OTP Verifiy successfully',
     UpdatePassword: 'Password updated successfully',
     ResetPassword: 'Password reset successfully',
     Fetched: 'User details fetched successfully',

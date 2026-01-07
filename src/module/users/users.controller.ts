@@ -75,7 +75,11 @@ export class UsersController {
     const result = await this.usersService.passwordTokenValidation(
       forgotPswTknValidationDto,
     );
-    return ResponseUtil.success(result, undefined, HttpStatus.OK);
+    return ResponseUtil.success(
+      result,
+      UsersOperation.OTP_VERIFICATION,
+      HttpStatus.OK,
+    );
   }
 
   @Public(AccessTypes.PUBLIC)

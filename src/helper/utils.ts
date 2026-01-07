@@ -36,6 +36,8 @@ export function getMessageByCode(messageKey: string): string {
       return Messages.UserMessages.Login;
     case UsersOperation.OTP_SENT:
       return Messages.UserMessages.Otp_Sent;
+    case UsersOperation.OTP_VERIFICATION:
+      return Messages.UserMessages.Otp_Verifiy;
     case UsersOperation.RESET_PASSWORD:
       return Messages.UserMessages.ResetPassword;
     case UsersOperation.UPDATE_PASSWORD:
