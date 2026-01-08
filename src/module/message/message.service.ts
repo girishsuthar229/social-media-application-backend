@@ -301,4 +301,21 @@ export class MessageService {
 
     return { count: total, rows };
   }
+
+  async getUnReadMessageUsers(
+    currentUserId: number,
+  ): Promise<{ totalCount: number }> {
+    const queryBuilder = this.messageRepository
+      .createQueryBuilder('m')
+      .where('m.receiver_id = :currentUserId', { currentUserId })
+      .andWhere('m.is_read = :isRead', { isRead: false })
+      .andWhere('m.status != :status', { status: MessageStatus.SEEN })
+      .andWhere('m.deleted_at IS NULL');
+
+    const totalUnreadMessages = await queryBuilder
+      .select('DISTINCT m.sender_id')
+      .getCount();
+
+    return { totalCount: totalUnreadMessages };
+  }
 }

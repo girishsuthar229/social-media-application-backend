@@ -59,4 +59,14 @@ export class MessageController {
       HttpStatus.OK,
     );
   }
+
+  @Get('/get-unread-users-total-count')
+  async getUnReadMessageUsers(@CurrentUser() user: UserDetails) {
+    const data = await this.messageService.getUnReadMessageUsers(user?.id);
+    return ResponseUtil.success(
+      data,
+      MessageOperation.UNREAD_MESSAGE_ALL_USERS,
+      HttpStatus.OK,
+    );
+  }
 }

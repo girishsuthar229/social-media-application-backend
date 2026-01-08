@@ -55,6 +55,7 @@ export const Messages = {
     createMessage: 'message send successfully.',
     readMessage: 'message read by user.',
     FetchedMessage: 'message list fetched successfully',
+    unReadMessageUsers: 'unread message users fetched successfully',
   },
 };
 export const ErrorMessages: Record<ErrorType, string> = {

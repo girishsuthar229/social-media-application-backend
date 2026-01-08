@@ -85,6 +85,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
           .to(`user_${payload?.selected_user_id}`)
           .emit('check_read_message', response);
       }
+      const data = await this.messageService.getUnReadMessageUsers(
+        payload.current_user_id,
+      );
+      if (data) {
+        this.server
+          .to(`user_${payload.current_user_id}`)
+          .emit('unread_messages_total_users', data);
+      }
     } catch (error) {
       console.error('Error handling read message:', error);
       client.emit('read_message_error', {
