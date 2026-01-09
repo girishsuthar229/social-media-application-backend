@@ -310,12 +310,12 @@ export class MessageService {
       .where('m.receiver_id = :currentUserId', { currentUserId })
       .andWhere('m.is_read = :isRead', { isRead: false })
       .andWhere('m.status != :status', { status: MessageStatus.SEEN })
-      .andWhere('m.deleted_at IS NULL');
+      .andWhere('m.deleted_at IS NULL')
+      .select('DISTINCT m.sender_id');
 
-    const totalUnreadMessages = await queryBuilder
-      .select('DISTINCT m.sender_id')
-      .getCount();
+    const messages = await queryBuilder.getRawMany();
+    const distinctSenderCount = messages.length;
 
-    return { totalCount: totalUnreadMessages };
+    return { totalCount: distinctSenderCount };
   }
 }
