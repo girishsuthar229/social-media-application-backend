@@ -127,4 +127,102 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       console.error('Error new user created:', error);
     }
   }
+
+  // @SubscribeMessage('edit_message')
+  // async handleEditMessage(
+  //   @ConnectedSocket() client: Socket,
+  //   @MessageBody()
+  //   data: {
+  //     message_id: number;
+  //     message: string;
+  //     receiver_id: number;
+  //   },
+  // ) {
+  //   try {
+  //     const senderId = parseInt(client.handshake.query.userId as string, 10);
+  //     const message = await this.messageService.getMessageById(data.message_id);
+  //     if (!message && message.sender_id !== senderId) {
+  //       client.emit('message_error', {
+  //         error: 'Message not found or unauthorized',
+  //       });
+  //       return;
+  //     }
+
+  //     // Update locally (service will handle this, but we can emit optimistically)
+  //     const updatedMessage: UserMessageListModel = {
+  //       id: message.id,
+  //       message: data.message,
+  //       is_edited: true,
+  //       edited_at: new Date().toString(),
+  //       created_date: message.created_at.toString(),
+  //       modified_date: new Date().toString(),
+  //       status: message.status,
+  //       is_read: message.is_read,
+  //       is_deleted: message.is_deleted,
+  //       sender: {
+  //         id: message.sender.id,
+  //         user_name: message.sender.user_name,
+  //         first_name: message.sender.first_name,
+  //         last_name: message.sender.last_name,
+  //         photo_url: message.sender.photo_url,
+  //       },
+  //       receiver: {
+  //         id: message.receiver.id,
+  //         user_name: message.receiver.user_name,
+  //         first_name: message.receiver.first_name,
+  //         last_name: message.receiver.last_name,
+  //         photo_url: message.receiver.photo_url,
+  //       },
+  //     };
+
+  //     // Emit to receiver
+  //     this.server
+  //       .to(`user_${data.receiver_id}`)
+  //       .emit('message_edited', updatedMessage);
+
+  //     // Also emit back to sender for confirmation
+  //     client.emit('message_edited', updatedMessage);
+
+  //     console.log(`Message ${data.message_id} edited by user ${senderId}`);
+  //   } catch (error) {
+  //     console.error('Error editing message:', error);
+  //     client.emit('message_error', { error: 'Failed to edit message' });
+  //   }
+  // }
+
+  @SubscribeMessage('delete_message')
+  async handleDeleteMessage(
+    @ConnectedSocket() client: Socket,
+    @MessageBody()
+    data: {
+      message_id: number;
+      receiver_id: number;
+    },
+  ) {
+    try {
+      const senderId = parseInt(client.handshake.query.userId as string, 10);
+      const message = await this.messageService.getMessageById(data.message_id);
+      if (message.deleted_at === null) {
+        client.emit('message_error', {
+          error: 'Message not found or unauthorized',
+        });
+        return;
+      }
+      // Emit to receiver
+      this.server.to(`user_${data.receiver_id}`).emit('message_deleted', {
+        message_id: data.message_id,
+        sender_id: senderId,
+      });
+      // Also emit back to sender for confirmation
+      client.emit('message_deleted', {
+        message_id: data.message_id,
+        sender_id: senderId,
+      });
+
+      console.log(`Message ${data.message_id} deleted by user ${senderId}`);
+    } catch (error) {
+      console.error('Error deleting message:', error);
+      client.emit('message_error', { error: 'Failed to delete message' });
+    }
+  }
 }

@@ -109,6 +109,12 @@ export function getMessageByCode(messageKey: string): string {
       return Messages.SendUserMessages.unReadMessageUsers;
     case MessageOperation.MESSAGE_FETCHED:
       return Messages.SendUserMessages.FetchedMessage;
+    case MessageOperation.MESSAGE_UPDATE:
+      return Messages.SendUserMessages.updateMessage;
+    case MessageOperation.MESSAGE_DELETE:
+      return Messages.SendUserMessages.deleteMessage;
+    case MessageOperation.UNAUTHORIZED_ACTION:
+      return Messages.SendUserMessages.unauthorizedActoion;
 
     default:
       return Messages.InternalServerError;

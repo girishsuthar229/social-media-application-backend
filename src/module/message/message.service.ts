@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, IsNull, Repository } from 'typeorm';
 import { Message } from './entity/message.entity';
@@ -15,7 +15,8 @@ import {
   UserMessageListModel,
   UserReadMessageModel,
 } from './interface/message.interface';
-import { MessageStatus } from 'src/helper/enum';
+import { ErrorType, MessageStatus } from 'src/helper/enum';
+import { ErrorMessages } from 'src/helper';
 
 @Injectable()
 export class MessageService {
@@ -26,6 +27,21 @@ export class MessageService {
     private readonly usersRepository: Repository<Users>,
   ) {}
 
+  async getMessageById(messageId: number): Promise<Message> {
+    const message = await this.messageRepository.findOne({
+      where: { id: messageId },
+      relations: ['sender', 'receiver'],
+    });
+
+    if (!message) {
+      throw new NotFoundException({
+        error: ErrorType.MessageNotFound,
+        message: ErrorMessages[ErrorType.MessageNotFound],
+      });
+    }
+
+    return message;
+  }
   async userSendMessage(
     newMessageDto: NewMessageDto,
   ): Promise<UserMessageListModel> {
@@ -317,5 +333,28 @@ export class MessageService {
     const distinctSenderCount = messages.length;
 
     return { totalCount: distinctSenderCount };
+  }
+
+  async deleteMessage(
+    messageId: number,
+  ): Promise<{ message_id: number; deleted: boolean }> {
+    const message = await this.messageRepository.findOne({
+      where: { id: messageId },
+      relations: ['sender', 'receiver'],
+    });
+
+    if (!message) {
+      throw new NotFoundException({
+        error: ErrorType.MessageNotFound,
+        message: ErrorMessages[ErrorType.MessageNotFound],
+      });
+    }
+
+    message.deleted_at = new Date();
+    await this.messageRepository.save(message);
+    return {
+      message_id: messageId,
+      deleted: true,
+    };
   }
 }

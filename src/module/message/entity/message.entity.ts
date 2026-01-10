@@ -35,6 +35,26 @@ export class Message {
   })
   status: MessageStatus;
 
+  @Column({ default: false })
+  is_edited: boolean;
+
+  @Column({ nullable: true })
+  file_url: string;
+  @Column({ nullable: true })
+  file_type: string; // 'image', 'video', 'document', 'audio'
+  @Column({ nullable: true })
+  file_name: string;
+  @Column({ type: 'bigint', nullable: true })
+  file_size: number;
+
+
+  @Column({ type: 'decimal', precision: 10, scale: 7, nullable: true })
+  latitude: number;
+  @Column({ type: 'decimal', precision: 10, scale: 7, nullable: true })
+  longitude: number;
+  @Column({ nullable: true })
+  location_name: string;
+
   @CreateDateColumn({ name: 'created_at' })
   created_at: Date;
 

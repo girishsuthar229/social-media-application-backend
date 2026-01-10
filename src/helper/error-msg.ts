@@ -52,10 +52,13 @@ export const Messages = {
     followings: 'followings fetched successfully',
   },
   SendUserMessages: {
-    createMessage: 'message send successfully.',
+    createMessage: 'message sent successfully.',
     readMessage: 'message read by user.',
     FetchedMessage: 'message list fetched successfully',
     unReadMessageUsers: 'unread message users fetched successfully',
+    updateMessage: 'Message updated successfully',
+    deleteMessage: 'Message deleted successfully',
+    unauthorizedActoion: 'You are not authorized to perform this action',
   },
 };
 export const ErrorMessages: Record<ErrorType, string> = {
@@ -127,4 +130,5 @@ export const ErrorMessages: Record<ErrorType, string> = {
     'You are not authorized to yourself follow-unfollow',
   [ErrorType.AlreadySavedPost]: 'Post already saved',
   [ErrorType.AlreadyUnSavedPost]: 'Post already un-saved',
+  [ErrorType.MessageNotFound]: 'Message not found',
 };

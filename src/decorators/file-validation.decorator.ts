@@ -12,5 +12,5 @@ export const FileValidation = (options: FileValidationOptions) =>
   SetMetadata(FILE_VALIDATION_KEY, {
     ...options,
     isRemovable: options.isRemovable ?? false,
-    isOptional: options.isOptional ?? false
+    isOptional: options.isOptional ?? false,
   });

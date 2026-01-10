@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsEnum } from 'class-validator';
 
 export class NewMessageDto {
   @IsNotEmpty()
@@ -12,4 +12,20 @@ export class NewMessageDto {
   @IsNotEmpty()
   @IsString()
   message: string;
+
+  @IsOptional()
+  @IsEnum(['image', 'video', 'audio', 'document'])
+  file_type?: string;
+
+  @IsOptional()
+  @IsString()
+  latitude?: number;
+
+  @IsOptional()
+  @IsString()
+  longitude?: number;
+
+  @IsOptional()
+  @IsString()
+  location_name?: string;
 }

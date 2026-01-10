@@ -18,7 +18,6 @@ import { FileValidationInterceptor, ResponseUtil } from 'src/interceptors';
 import { CreatePostDto } from './dto/create-post.dto';
 import { FileValidation } from 'src/decorators/file-validation.decorator';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { CreatePost } from './entity/post.entity';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { QueryPostDto } from './dto/query-post.dto';
 import { SearchResponse } from 'src/helper/interface';

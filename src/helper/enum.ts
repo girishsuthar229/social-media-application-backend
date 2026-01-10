@@ -17,6 +17,24 @@ export enum MimeType {
   JPEG = 'image/jpeg',
   SVG = 'image/svg+xml',
 }
+export enum VideoMimeType {
+  MP4 = 'video/mp4',
+  WEBM = 'video/webm',
+}
+export enum AudioMimeType {
+  MPEG = 'audio/mpeg',
+  OGG = 'audio/ogg',
+  WAV = 'audio/wav',
+}
+export enum DocumnetMimeType {
+  PDF = 'application/pdf',
+  DOCUMENT = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  SPREADSHEET = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+}
+
+export enum MaxFileSize {
+  MESSAGE_SEND_MAX_FILE_SIZE = 50 * 1024 * 1024,
+}
 
 export enum SystemConfigKeys {
   AUTO_LOGOUT_SESSION_TIME = 60,
@@ -84,6 +102,7 @@ export enum ErrorType {
   FollowNotAuthorized = 'FollowNotAuthorized',
   AlreadySavedPost = 'AlreadySavedPost',
   AlreadyUnSavedPost = 'AlreadyUnSavedPost',
+  MessageNotFound = 'MessageNotFound',
 }
 
 export enum RolesOperation {
@@ -100,6 +119,10 @@ export enum MessageOperation {
   MESSAGE_FETCHED = 'MESSAGE_FETCHED',
   MESSAGE_READ = 'MESSAGE_READ',
   UNREAD_MESSAGE_ALL_USERS = 'UNREAD_MESSAGE_ALL_USERS',
+  MESSAGE_UPDATE = 'MESSAGE_UPDATE',
+  MESSAGE_DELETE = 'MESSAGE_DELETE',
+  MESSAGE_NOT_FOUND = 'MESSAGE_NOT_FOUND',
+  UNAUTHORIZED_ACTION = 'UNAUTHORIZED_ACTION',
 }
 
 export enum UsersOperation {

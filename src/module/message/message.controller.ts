@@ -1,16 +1,35 @@
-import { Body, Controller, Get, HttpStatus, Param, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpStatus,
+  Param,
+  Post,
+  Put,
+  UseInterceptors,
+} from '@nestjs/common';
 import { MessageService } from './message.service';
-import { CurrentUser } from 'src/decorators';
+import { CurrentUser, FileValidation } from 'src/decorators';
 import { IResponse, UserDetails } from 'src/helper';
 import { SearchResponse } from 'src/helper/interface';
-import { ResponseUtil } from 'src/interceptors';
+import { FileValidationInterceptor, ResponseUtil } from 'src/interceptors';
 import { GetAllMsgUsersDto } from './dto/get-all-msg-user.dto';
 import {
   MsgUserListResponseModel,
   UserMessageListModel,
 } from './interface/message.interface';
-import { MessageOperation } from 'src/helper/enum';
+import {
+  AudioMimeType,
+  DocumnetMimeType,
+  MaxFileSize,
+  MessageOperation,
+  MimeType,
+  VideoMimeType,
+} from 'src/helper/enum';
 import { NewMessageDto } from './dto/new-msg-dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { EditMessageDto } from './dto/edit-and-delete-msg-dto';
 
 @Controller('message')
 export class MessageController {
@@ -32,6 +51,23 @@ export class MessageController {
     );
   }
 
+  @UseInterceptors(FileInterceptor('post_image'), FileValidationInterceptor)
+  @FileValidation({
+    allowedMimeTypes: [
+      MimeType.PNG,
+      MimeType.JPG,
+      MimeType.JPEG,
+      MimeType.SVG,
+      VideoMimeType.MP4,
+      VideoMimeType.WEBM,
+      AudioMimeType.MPEG,
+      AudioMimeType.OGG,
+      DocumnetMimeType.DOCUMENT,
+      DocumnetMimeType.PDF,
+      DocumnetMimeType.SPREADSHEET,
+    ],
+    maxSize: MaxFileSize.MESSAGE_SEND_MAX_FILE_SIZE,
+  })
   @Post('/send-message')
   async userSendMessageServices(
     @Body() newMessageDto: NewMessageDto,
@@ -66,6 +102,34 @@ export class MessageController {
     return ResponseUtil.success(
       data,
       MessageOperation.UNREAD_MESSAGE_ALL_USERS,
+      HttpStatus.OK,
+    );
+  }
+
+  // @Put('/:messageId')
+  // async editMessage(
+  //   @Param('messageId') messageId: string,
+  //   @Body() editMessageDto: EditMessageDto,
+  // ): Promise<IResponse<UserMessageListModel>> {
+  //   const data = await this.messageService.editMessage(
+  //     messageId,
+  //     editMessageDto,
+  //   );
+  //   return ResponseUtil.success(
+  //     data,
+  //     MessageOperation.MESSAGE_UPDATE,
+  //     HttpStatus.OK,
+  //   );
+  // }
+
+  @Delete('/:messageId')
+  async deleteMessage(
+    @Param('messageId') messageId: number,
+  ): Promise<IResponse<{ message_id: number; deleted: boolean }>> {
+    const data = await this.messageService.deleteMessage(messageId);
+    return ResponseUtil.success(
+      data,
+      MessageOperation.MESSAGE_DELETE,
       HttpStatus.OK,
     );
   }
