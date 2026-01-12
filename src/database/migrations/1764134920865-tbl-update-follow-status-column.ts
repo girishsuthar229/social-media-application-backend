@@ -1,10 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class AddStatusColumnToFollowsTable1764134920866
-  implements MigrationInterface
-{
-  name = 'AddStatusColumnToFollowsTable1764134920866';
-
+export class AddStatusColumnToFollowsTable1764134920866 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
       CREATE TYPE "follows_status_enum" AS ENUM ('pending', 'accepted');
