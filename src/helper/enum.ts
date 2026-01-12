@@ -84,6 +84,7 @@ export enum ErrorType {
   FollowNotAuthorized = 'FollowNotAuthorized',
   AlreadySavedPost = 'AlreadySavedPost',
   AlreadyUnSavedPost = 'AlreadyUnSavedPost',
+  MessageNotFound = 'MessageNotFound',
 }
 
 export enum RolesOperation {

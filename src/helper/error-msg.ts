@@ -127,4 +127,5 @@ export const ErrorMessages: Record<ErrorType, string> = {
     'You are not authorized to yourself follow-unfollow',
   [ErrorType.AlreadySavedPost]: 'Post already saved',
   [ErrorType.AlreadyUnSavedPost]: 'Post already un-saved',
+  [ErrorType.MessageNotFound]: 'Message not found.',
 };

@@ -2,8 +2,8 @@ import { IsOptional, IsString, IsEnum } from 'class-validator';
 import { BaseFilterDto } from 'src/helper/interface';
 
 export enum UserSortBy {
-  CREATED_AT = 'created_at',
-  UPDATED_AT = 'updated_at',
+  CREATED_DATE = 'created_date',
+  MODIFIED_DATE = 'modified_date',
 }
 
 export enum SortOrder {
@@ -18,7 +18,7 @@ export class GetAllMsgUsersDto extends BaseFilterDto {
 
   @IsOptional()
   @IsEnum(UserSortBy)
-  sortBy?: UserSortBy = UserSortBy.CREATED_AT;
+  sortBy?: UserSortBy = UserSortBy.CREATED_DATE;
 
   @IsOptional()
   @IsEnum(SortOrder)

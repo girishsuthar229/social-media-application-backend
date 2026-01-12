@@ -35,14 +35,14 @@ export class Message {
   })
   status: MessageStatus;
 
-  @CreateDateColumn({ name: 'created_at' })
-  created_at: Date;
+  @CreateDateColumn({ name: 'created_date' })
+  created_date: Date;
 
-  @UpdateDateColumn({ name: 'updated_at' })
-  updated_at: Date;
+  @UpdateDateColumn({ name: 'modified_date' })
+  modified_date: Date;
 
-  @DeleteDateColumn({ name: 'deleted_at' })
-  deleted_at: Date;
+  @DeleteDateColumn({ name: 'deleted_date' })
+  deleted_date: Date;
 
   @ManyToOne(() => Users)
   @JoinColumn({ name: 'sender_id' })

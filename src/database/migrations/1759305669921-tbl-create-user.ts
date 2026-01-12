@@ -14,19 +14,20 @@ export class TblCreateUser1759305669921 implements MigrationInterface {
         birth_date TIMESTAMP,
         password_hash VARCHAR(60) NOT NULL,
         address VARCHAR(300),
-        is_forgot_token_used BOOLEAN DEFAULT FALSE,
-        is_reset_token_used BOOLEAN DEFAULT FALSE,
-        password_token VARCHAR(100),
-        password_set_expires_at TIMESTAMP,
         last_login_at TIMESTAMP(3),
         otp VARCHAR(6),
         otp_expiration_time TIMESTAMP(3),
         photo_url VARCHAR(300),
-        
-        -- audit fields from BaseEntity
-        created_at TIMESTAMP DEFAULT now(),
-        updated_at TIMESTAMP DEFAULT now(),
-        deleted_at TIMESTAMP,
+        is_forgot_token_used BOOLEAN DEFAULT FALSE,
+        is_reset_token_used BOOLEAN DEFAULT FALSE,
+        password_set_expires_at TIMESTAMP,
+        password_token VARCHAR(100),
+
+        created_date TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT now(),
+        created_by VARCHAR(50),
+        modified_date TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT now(),
+        modified_by VARCHAR(50),
+        deleted_date TIMESTAMP WITHOUT TIME ZONE,
 
         CONSTRAINT fk_role FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE
       );

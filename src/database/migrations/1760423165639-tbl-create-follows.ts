@@ -7,7 +7,10 @@ export class TblCreateFollows1760423165639 implements MigrationInterface {
             id SERIAL PRIMARY KEY,
             follower_id INTEGER NOT NULL,
             following_id INTEGER NOT NULL,
-            created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT now(),
+            created_date TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT now(),
+            created_by VARCHAR(50),
+            modified_date TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT now(),
+            modified_by VARCHAR(50),
             CONSTRAINT uq_follows_follower_following UNIQUE (follower_id, following_id),
             CONSTRAINT fk_follows_follower_id_users_id FOREIGN KEY (follower_id) REFERENCES users(id) ON DELETE CASCADE,
             CONSTRAINT fk_follows_following_id_users_id FOREIGN KEY (following_id) REFERENCES users(id) ON DELETE CASCADE

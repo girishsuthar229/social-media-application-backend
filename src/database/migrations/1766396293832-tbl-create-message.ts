@@ -11,11 +11,14 @@ export class TblCreateMessage1766396293832 implements MigrationInterface {
 
         message TEXT NOT NULL,
         is_read BOOLEAN DEFAULT FALSE,
-
+        
+        -- New status column (Sent, Delivered, Seen)
+        status VARCHAR(10) NOT NULL DEFAULT 'sent',
+        
         -- audit fields
-        created_at TIMESTAMP DEFAULT now(),
-        updated_at TIMESTAMP DEFAULT now(),
-        deleted_at TIMESTAMP,
+        created_date TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT now(),
+        modified_date TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT now(),
+        deleted_date TIMESTAMP WITHOUT TIME ZONE,
 
         CONSTRAINT fk_sender
           FOREIGN KEY (sender_id)

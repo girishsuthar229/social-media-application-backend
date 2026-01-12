@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, IsNull, Repository } from 'typeorm';
 import { Message } from './entity/message.entity';
@@ -15,7 +15,8 @@ import {
   UserMessageListModel,
   UserReadMessageModel,
 } from './interface/message.interface';
-import { MessageStatus } from 'src/helper/enum';
+import { ErrorType, MessageStatus } from 'src/helper/enum';
+import { ErrorMessages } from 'src/helper';
 
 @Injectable()
 export class MessageService {
@@ -48,8 +49,8 @@ export class MessageService {
     const response: UserMessageListModel = {
       id: savedMessage?.id || 0,
       message: savedMessage?.message || '',
-      created_date: savedMessage?.created_at.toString() || '',
-      modified_date: savedMessage?.updated_at?.toString() || '',
+      created_date: savedMessage?.created_date.toString() || '',
+      modified_date: savedMessage?.modified_date?.toString() || '',
       status: savedMessage?.status || MessageStatus.SENT,
       is_read: savedMessage?.is_read || false,
       sender: {
@@ -77,11 +78,11 @@ export class MessageService {
       where: {
         sender_id: readMessage?.selected_user_id,
         receiver_id: readMessage?.current_user_id,
-        deleted_at: IsNull(),
+        deleted_date: IsNull(),
         is_read: false,
         status: MessageStatus.SENT || MessageStatus.DELIVERED,
       },
-      order: { created_at: 'ASC' },
+      order: { created_date: 'ASC' },
       relations: ['sender', 'receiver'],
     });
 
@@ -98,8 +99,8 @@ export class MessageService {
         return {
           id: message?.id || 0,
           message: message?.message || '',
-          created_date: message?.created_at.toString() || '',
-          modified_date: message?.updated_at?.toString() || '',
+          created_date: message?.created_date.toString() || '',
+          modified_date: message?.modified_date?.toString() || '',
           status: MessageStatus.SEEN,
           is_read: true,
           sender: {
@@ -130,10 +131,18 @@ export class MessageService {
   ): Promise<UserMessageListModel[]> {
     const messages = await this.messageRepository.find({
       where: [
-        { sender_id: user1, receiver_id: currentUserId, deleted_at: IsNull() },
-        { sender_id: currentUserId, receiver_id: user1, deleted_at: IsNull() },
+        {
+          sender_id: user1,
+          receiver_id: currentUserId,
+          deleted_date: IsNull(),
+        },
+        {
+          sender_id: currentUserId,
+          receiver_id: user1,
+          deleted_date: IsNull(),
+        },
       ],
-      order: { created_at: 'ASC' },
+      order: { created_date: 'ASC' },
       relations: ['sender', 'receiver'],
     });
 
@@ -143,8 +152,8 @@ export class MessageService {
       return {
         id: message.id,
         message: message.message,
-        created_date: message.created_at.toString(),
-        modified_date: message?.updated_at?.toString() || '',
+        created_date: message.created_date.toString(),
+        modified_date: message?.modified_date?.toString() || '',
         status: message?.status,
         is_read: message?.is_read,
         sender: {
@@ -175,7 +184,7 @@ export class MessageService {
       offset,
       limit,
       searchName,
-      sortBy = UserSortBy.CREATED_AT,
+      sortBy = UserSortBy.CREATED_DATE,
       sortOrder = SortOrder.DESC,
     } = queryDto;
 
@@ -183,7 +192,7 @@ export class MessageService {
       .createQueryBuilder('m')
       .leftJoinAndSelect('m.sender', 'sender')
       .leftJoinAndSelect('m.receiver', 'receiver')
-      .where('m.deleted_at IS NULL')
+      .where('m.deleted_date IS NULL')
       .andWhere(
         '(m.sender_id = :currentUserId OR m.receiver_id = :currentUserId)',
         { currentUserId },
@@ -231,7 +240,7 @@ export class MessageService {
                 currentUserId,
               },
             )
-            .orderBy('m.created_at', 'DESC')
+            .orderBy('m.created_date', 'DESC')
             .getOne();
 
           return {
@@ -246,8 +255,8 @@ export class MessageService {
               receiver_id: lastMessage?.receiver_id ?? 0,
               status: lastMessage?.status ?? '',
               last_message: lastMessage?.message ?? '',
-              created_date: lastMessage?.created_at.toString() ?? '',
-              modified_date: lastMessage?.updated_at?.toString() ?? '',
+              created_date: lastMessage?.created_date.toString() ?? '',
+              modified_date: lastMessage?.modified_date?.toString() ?? '',
               is_read: lastMessage?.is_read,
             },
           };
@@ -276,7 +285,7 @@ export class MessageService {
               currentUserId,
             },
           )
-          .orderBy('m.created_at', 'DESC')
+          .orderBy('m.created_date', 'DESC')
           .getOne();
 
         return {
@@ -290,8 +299,8 @@ export class MessageService {
             sender_id: lastMessage?.sender_id ?? 0,
             receiver_id: lastMessage?.receiver_id ?? 0,
             last_message: lastMessage?.message ?? '',
-            created_date: lastMessage?.created_at.toString() ?? '',
-            modified_date: lastMessage?.updated_at?.toString() ?? '',
+            created_date: lastMessage?.created_date.toString() ?? '',
+            modified_date: lastMessage?.modified_date?.toString() ?? '',
             status: lastMessage?.status ?? '',
             is_read: lastMessage?.is_read,
           },
@@ -310,12 +319,35 @@ export class MessageService {
       .where('m.receiver_id = :currentUserId', { currentUserId })
       .andWhere('m.is_read = :isRead', { isRead: false })
       .andWhere('m.status != :status', { status: MessageStatus.SEEN })
-      .andWhere('m.deleted_at IS NULL')
+      .andWhere('m.deleted_date IS NULL')
       .select('DISTINCT m.sender_id');
 
     const messages = await queryBuilder.getRawMany();
     const distinctSenderCount = messages.length;
 
     return { totalCount: distinctSenderCount };
+  }
+
+  async deleteMessage(
+    messageId: number,
+  ): Promise<{ message_id: number; deleted: boolean }> {
+    const message = await this.messageRepository.findOne({
+      where: { id: messageId },
+      relations: ['sender', 'receiver'],
+    });
+
+    if (!message) {
+      throw new NotFoundException({
+        error: ErrorType.MessageNotFound,
+        message: ErrorMessages[ErrorType.MessageNotFound],
+      });
+    }
+
+    message.deleted_date = new Date();
+    await this.messageRepository.save(message);
+    return {
+      message_id: messageId,
+      deleted: true,
+    };
   }
 }

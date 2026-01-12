@@ -65,7 +65,9 @@ export class CommentsService {
       .andWhere('user.deleted_date IS NULL');
 
     const [commentUsers] = await queryBuilder.getManyAndCount();
-
+    console.log('commentUsers post_id', post_id);
+    console.log('commentUsers currentUserId', currentUserId);
+    console.log('commentUsers', commentUsers);
     const result: CommentsPostUserListResponseModel[] = commentUsers.map(
       (comment) => {
         const commentUser = comment.user;
