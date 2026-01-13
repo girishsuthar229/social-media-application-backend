@@ -21,7 +21,7 @@ export class TblCreateUser1759305669921 implements MigrationInterface {
         is_forgot_token_used BOOLEAN DEFAULT FALSE,
         is_reset_token_used BOOLEAN DEFAULT FALSE,
         password_set_expires_at TIMESTAMP,
-        password_token VARCHAR(100),
+        password_token VARCHAR(255),
 
         created_date TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT now(),
         created_by VARCHAR(50),
