@@ -33,7 +33,7 @@ import { GetAllUsersDto, SortOrder, UserSortBy } from './dto/get-all-users.dto';
 import { SearchResponse } from 'src/helper/interface';
 import { FollowingsEnum } from '../follows/entity/follow.entity';
 import { UploadFolders } from 'src/helper/enum';
-import { MailerService } from '../mailer/mailer.service';
+// import { MailerService } from '../mailer/mailer.service';
 import { ChatGateway } from '../mailer/gateway/chat.gateway';
 
 @Injectable()
@@ -41,8 +41,8 @@ export class UsersService {
   constructor(
     @InjectRepository(Users)
     private usersRepository: Repository<Users>,
-    private readonly rolesService: RolesService,
-    private readonly mailerService: MailerService,
+    // private readonly rolesService: RolesService,
+    // private readonly mailerService: MailerService,
     private readonly chatGateway: ChatGateway,
     private jwtService: JwtService,
   ) {}

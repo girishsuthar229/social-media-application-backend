@@ -77,7 +77,7 @@ export class UsersController {
     );
     return ResponseUtil.success(
       result,
-      UsersOperation.OTP_VERIFICATION,
+     undefined,
       HttpStatus.OK,
     );
   }
@@ -91,7 +91,7 @@ export class UsersController {
       verifyOtpDto.token,
       verifyOtpDto.otp,
     );
-    return ResponseUtil.success(result, undefined, HttpStatus.OK);
+    return ResponseUtil.success(result,  UsersOperation.OTP_VERIFICATION, HttpStatus.OK);
   }
 
   @Public(AccessTypes.PUBLIC)
