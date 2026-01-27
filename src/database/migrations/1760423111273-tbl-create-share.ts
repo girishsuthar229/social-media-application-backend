@@ -9,7 +9,7 @@ export class TblCreateShare1760423111273 implements MigrationInterface {
             post_id INTEGER NOT NULL,
             created_date TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT now(),
             created_by VARCHAR(50),
-            modified_date TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT now(),
+            modified_date TIMESTAMP WITHOUT TIME ZONE,
             modified_by VARCHAR(50),
             CONSTRAINT uq_shares_user_post UNIQUE (user_id, post_id),
             CONSTRAINT fk_shares_user_id_users_id FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,

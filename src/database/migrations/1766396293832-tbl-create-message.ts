@@ -17,7 +17,7 @@ export class TblCreateMessage1766396293832 implements MigrationInterface {
         
         -- audit fields
         created_date TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT now(),
-        modified_date TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT now(),
+        modified_date TIMESTAMP WITHOUT TIME ZONE,
         deleted_date TIMESTAMP WITHOUT TIME ZONE,
 
         CONSTRAINT fk_sender

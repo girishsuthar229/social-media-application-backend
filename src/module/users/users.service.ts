@@ -8,7 +8,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { IsNull, Raw, Repository } from 'typeorm';
 import { Users } from './entity/user.entity';
-import { RolesService } from '../roles/roles.service';
+// import { RolesService } from '../roles/roles.service';
 import { JwtService } from '@nestjs/jwt';
 import {
   ErrorMessages,

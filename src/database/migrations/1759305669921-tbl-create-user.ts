@@ -25,7 +25,7 @@ export class TblCreateUser1759305669921 implements MigrationInterface {
 
         created_date TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT now(),
         created_by VARCHAR(50),
-        modified_date TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT now(),
+        modified_date TIMESTAMP WITHOUT TIME ZONE,
         modified_by VARCHAR(50),
         deleted_date TIMESTAMP WITHOUT TIME ZONE,
 

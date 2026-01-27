@@ -14,7 +14,7 @@ export class TblCreatePosts1760421921053 implements MigrationInterface {
         user_id INTEGER NOT NULL,
         created_date TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT now(),
         created_by VARCHAR(50),
-        modified_date TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT now(),
+        modified_date TIMESTAMP WITHOUT TIME ZONE,
         modified_by VARCHAR(50),
         deleted_date TIMESTAMP WITHOUT TIME ZONE,
         CONSTRAINT fk_posts_user_id_users_id FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE

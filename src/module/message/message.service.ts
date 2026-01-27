@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, IsNull, Repository } from 'typeorm';
 import { Message } from './entity/message.entity';
@@ -328,14 +332,69 @@ export class MessageService {
     return { totalCount: distinctSenderCount };
   }
 
-  async deleteMessage(
+  async updateMessage(
     messageId: number,
-  ): Promise<{ message_id: number; deleted: boolean }> {
+    currentUserId: number,
+    updateMessageDto: NewMessageDto,
+  ): Promise<UserMessageListModel> {
+    if (Number(updateMessageDto?.sender_id) !== Number(currentUserId)) {
+      throw new NotFoundException({
+        error: ErrorType.PostNotToBeCreate,
+        message: ErrorMessages[ErrorType.PostNotToBeCreate],
+      });
+    }
+    const messageData = await this.messageRepository.findOne({
+      where: { id: messageId },
+      relations: ['sender', 'receiver'],
+    });
+    if (!messageData) {
+      throw new NotFoundException({
+        error: ErrorType.MessageNotFound,
+        message: ErrorMessages[ErrorType.MessageNotFound],
+      });
+    }
+
+    if (updateMessageDto?.message !== undefined) {
+      messageData.message = updateMessageDto?.message;
+      messageData.modified_date = new Date();
+    }
+    const updatedMessage = await this.messageRepository.save(messageData);
+    const response: UserMessageListModel = {
+      id: updatedMessage.id,
+      message: updatedMessage.message,
+      created_date: updatedMessage.created_date.toString(),
+      modified_date: updatedMessage?.modified_date?.toString() || '',
+      status: updatedMessage?.status,
+      is_read: updatedMessage?.is_read,
+      sender: {
+        id: updatedMessage?.sender?.id || 0,
+        user_name: updatedMessage?.sender?.user_name || '',
+        first_name: updatedMessage?.sender?.first_name || null,
+        last_name: updatedMessage?.sender?.last_name || null,
+        photo_url: updatedMessage?.sender?.photo_url || null,
+      },
+      receiver: {
+        id: updatedMessage?.receiver?.id || 0,
+        user_name: updatedMessage?.receiver?.user_name || '',
+        first_name: updatedMessage?.receiver?.first_name || null,
+        last_name: updatedMessage?.receiver?.last_name || null,
+        photo_url: updatedMessage?.receiver?.photo_url || null,
+      },
+    };
+    return response;
+  }
+
+  async deleteMessage(messageId: number, sendUserId: number): Promise<void> {
     const message = await this.messageRepository.findOne({
       where: { id: messageId },
       relations: ['sender', 'receiver'],
     });
-
+    if (message?.sender?.id !== sendUserId) {
+      throw new ForbiddenException({
+        error: ErrorType.Unauthorized,
+        message: ErrorMessages[ErrorType.Unauthorized],
+      });
+    }
     if (!message) {
       throw new NotFoundException({
         error: ErrorType.MessageNotFound,
@@ -344,10 +403,8 @@ export class MessageService {
     }
 
     message.deleted_date = new Date();
-    await this.messageRepository.save(message);
-    return {
-      message_id: messageId,
-      deleted: true,
-    };
+    await this.messageRepository.update(messageId, {
+      ...message,
+    });
   }
 }

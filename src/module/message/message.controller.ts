@@ -1,4 +1,14 @@
-import { Body, Controller, Get, HttpStatus, Param, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpStatus,
+  Param,
+  ParseIntPipe,
+  Post,
+  Put,
+} from '@nestjs/common';
 import { MessageService } from './message.service';
 import { CurrentUser } from 'src/decorators';
 import { IResponse, UserDetails } from 'src/helper';
@@ -66,6 +76,37 @@ export class MessageController {
     return ResponseUtil.success(
       data,
       MessageOperation.UNREAD_MESSAGE_ALL_USERS,
+      HttpStatus.OK,
+    );
+  }
+
+  @Put('/edit-message/:message_id')
+  async userEditMessageServices(
+    @Param('message_id', ParseIntPipe) message_id: number,
+    @Body() updateMessageDto: NewMessageDto,
+    @CurrentUser() user: UserDetails,
+  ): Promise<IResponse<UserMessageListModel>> {
+    const data = await this.messageService.updateMessage(
+      message_id,
+      user?.id,
+      updateMessageDto,
+    );
+    return ResponseUtil.success(
+      data,
+      MessageOperation.MESSAGE_UPDATED,
+      HttpStatus.OK,
+    );
+  }
+
+  @Delete('/delete-message/:message_id')
+  async userDeleteMessageServices(
+    @Param('message_id', ParseIntPipe) message_id: number,
+    @CurrentUser() user: UserDetails,
+  ): Promise<IResponse<null>> {
+    await this.messageService.deleteMessage(message_id, user.id);
+    return ResponseUtil.success(
+      null,
+      MessageOperation.MESSAGE_DELETED,
       HttpStatus.OK,
     );
   }
