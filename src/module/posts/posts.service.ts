@@ -65,6 +65,79 @@ export class PostsService {
 
     return this.postsRepository.save(newPost);
   }
+  // async getAllPosts(
+  //   queryDto: QueryPostDto,
+  //   currentUserId: number,
+  // ): Promise<SearchResponse<GetAllPostsReponseModel>> {
+  //   const {
+  //     offset,
+  //     limit,
+  //     sortBy = PostSortBy.CREATED_DATE,
+  //     sortOrder = SortOrder.DESC,
+  //   } = queryDto;
+  //   const queryBuilder = this.postsRepository
+  //     .createQueryBuilder('p')
+  //     .leftJoinAndSelect('p.user', 'postUser')
+  //     .leftJoinAndSelect('p.comments', 'comment')
+  //     .leftJoinAndSelect('comment.user', 'commentUser')
+  //     .leftJoinAndSelect('p.likes', 'like')
+  //     .leftJoinAndSelect('p.saved_posts', 'saved_post')
+  //     .leftJoinAndSelect('postUser.followers', 'followUser')
+  //     .where('p.deleted_date IS NULL')
+  //     .andWhere(
+  //       `(postUser.is_private = false OR postUser.id = :currentUserId
+  //       OR EXISTS (
+  //         SELECT 1 FROM follows f
+  //         WHERE f.follower_id = :currentUserId AND f.following_id = p.user_id  AND f.status = :acceptedStatus
+  //       )
+  //     )`,
+  //       {
+  //         currentUserId,
+  //         acceptedStatus: FollowingsEnum.ACCEPTED,
+  //       },
+  //     );
+
+  //   queryBuilder.addOrderBy(`p.${sortBy}`, sortOrder);
+  //   queryBuilder.take(limit).skip(offset);
+  //   const [userPosts, total] = await queryBuilder.getManyAndCount();
+
+  //   const response: GetAllPostsReponseModel[] = userPosts.map((post) => {
+  //     return {
+  //       post_id: post?.id,
+  //       content: post?.content,
+  //       image_url: post?.image_url,
+  //       like_count: post?.like_count,
+  //       share_count: post?.share_count,
+  //       comment_count: post?.comment_count,
+  //       self_comment: post?.self_comment || '',
+  //       comments: post?.comments
+  //         ?.filter((comment) => comment?.deleted_date === null)
+  //         ?.slice(0, 3)
+  //         .map((comment) => ({
+  //           id: comment?.id,
+  //           content: comment?.content,
+  //           user_id: comment?.user.id,
+  //           user_name: comment?.user.user_name,
+  //           created_date: comment?.created_date?.toString() ?? null,
+  //         })),
+  //       user: {
+  //         id: post?.user?.id,
+  //         user_name: post?.user?.user_name,
+  //         profile_pic_url: post?.user?.photo_url || '',
+  //       },
+  //       created_date: post?.created_date?.toString() ?? null,
+  //       modified_date: post?.modified_date?.toString() ?? null,
+  //       is_liked:
+  //         post.likes?.some((like) => like.user_id === currentUserId) ?? false,
+  //       is_saved:
+  //         post.saved_posts?.some((spost) => spost.user_id === currentUserId) ??
+  //         false,
+  //     };
+  //   });
+
+  //   return { count: total, rows: response };
+  // }
+
   async getAllPosts(
     queryDto: QueryPostDto,
     currentUserId: number,
@@ -75,33 +148,17 @@ export class PostsService {
       sortBy = PostSortBy.CREATED_DATE,
       sortOrder = SortOrder.DESC,
     } = queryDto;
-    const queryBuilder = this.postsRepository
-      .createQueryBuilder('p')
-      .leftJoinAndSelect('p.user', 'postUser')
-      .leftJoinAndSelect('p.comments', 'comment')
-      .leftJoinAndSelect('comment.user', 'commentUser')
-      .leftJoinAndSelect('p.likes', 'like')
-      .leftJoinAndSelect('p.saved_posts', 'saved_post')
-      .leftJoinAndSelect('postUser.followers', 'followUser')
-      .where('p.deleted_date IS NULL')
-      .andWhere(
-        `(postUser.is_private = false OR postUser.id = :currentUserId 
-        OR EXISTS (
-          SELECT 1 FROM follows f
-          WHERE f.follower_id = :currentUserId AND f.following_id = p.user_id  AND f.status = :acceptedStatus
-        )
-      )`,
-        {
-          currentUserId,
-          acceptedStatus: FollowingsEnum.ACCEPTED,
-        },
-      );
-
-    queryBuilder.addOrderBy(`p.${sortBy}`, sortOrder);
-    queryBuilder.take(limit).skip(offset);
-    const [userPosts, total] = await queryBuilder.getManyAndCount();
-
-    const response: GetAllPostsReponseModel[] = userPosts.map((post) => {
+    const query = `
+      SELECT * 
+      FROM sm_nest_schema.get_user_posts_by_created_date($1, $2, $3)
+      ORDER BY ${sortBy} ${sortOrder}
+    `;
+    const postsResult = await this.postsRepository.query(query, [
+      currentUserId,
+      limit,
+      offset,
+    ]);
+    const response: GetAllPostsReponseModel[] = postsResult.map((post: any) => {
       return {
         post_id: post?.id,
         content: post?.content,
@@ -110,34 +167,17 @@ export class PostsService {
         share_count: post?.share_count,
         comment_count: post?.comment_count,
         self_comment: post?.self_comment || '',
-        comments: post?.comments
-          ?.filter((comment) => comment?.deleted_date === null)
-          ?.slice(0, 3)
-          .map((comment) => ({
-            id: comment?.id,
-            content: comment?.content,
-            user_id: comment?.user.id,
-            user_name: comment?.user.user_name,
-            created_date: comment?.created_date?.toString() ?? null,
-          })),
-        user: {
-          id: post?.user?.id,
-          user_name: post?.user?.user_name,
-          profile_pic_url: post?.user?.photo_url || '',
-        },
+        comments: post?.comments ? post?.comments.slice(0, 3) : null,
+        user: post?.user,
         created_date: post?.created_date?.toString() ?? null,
         modified_date: post?.modified_date?.toString() ?? null,
-        is_liked:
-          post.likes?.some((like) => like.user_id === currentUserId) ?? false,
-        is_saved:
-          post.saved_posts?.some((spost) => spost.user_id === currentUserId) ??
-          false,
+        is_liked: post.is_liked ?? false,
+        is_saved: post.is_saved ?? false,
       };
     });
 
-    return { count: total, rows: response };
+    return { count: postsResult.length, rows: response };
   }
-
   async getUserPosts(
     alluserPostDto: UserAllPostsDto,
     currentUserId: number,
