@@ -57,6 +57,7 @@ export class MessageService {
       modified_date: savedMessage?.modified_date?.toString() || '',
       status: savedMessage?.status || MessageStatus.SENT,
       is_read: savedMessage?.is_read || false,
+      is_edited: savedMessage?.is_edited || false,
       sender: {
         id: sender?.id || 0,
         user_name: sender?.user_name || '',
@@ -91,11 +92,11 @@ export class MessageService {
     });
 
     if (messages.length > 0) {
-      const messageIds = messages.map((message) => message.id);
-      await this.messageRepository.update(
-        { id: In(messageIds) },
-        { is_read: true, status: MessageStatus.SEEN },
-      );
+      messages.forEach((message) => {
+        message.is_read = true;
+        message.status = MessageStatus.SEEN;
+      });
+      await this.messageRepository.save(messages);
 
       const msgResponse: UserMessageListModel[] = messages?.map((message) => {
         const sender = message?.sender;
@@ -160,6 +161,7 @@ export class MessageService {
         modified_date: message?.modified_date?.toString() || '',
         status: message?.status,
         is_read: message?.is_read,
+        is_edited: message?.is_edited,
         sender: {
           id: sender?.id || 0,
           user_name: sender?.user_name || '',
@@ -355,6 +357,7 @@ export class MessageService {
     }
 
     if (updateMessageDto?.message !== undefined) {
+      messageData.is_edited = true;
       messageData.message = updateMessageDto?.message;
       messageData.modified_date = new Date();
     }
@@ -366,6 +369,7 @@ export class MessageService {
       modified_date: updatedMessage?.modified_date?.toString() || '',
       status: updatedMessage?.status,
       is_read: updatedMessage?.is_read,
+      is_edited: updatedMessage?.is_edited,
       sender: {
         id: updatedMessage?.sender?.id || 0,
         user_name: updatedMessage?.sender?.user_name || '',

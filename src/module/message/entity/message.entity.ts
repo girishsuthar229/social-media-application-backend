@@ -28,6 +28,9 @@ export class Message {
   @Column({ default: false })
   is_read: boolean;
 
+  @Column({ default: false })
+  is_edited: boolean;
+
   @Column({
     type: 'enum',
     enum: MessageStatus,

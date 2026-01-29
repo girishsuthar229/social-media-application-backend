@@ -11,6 +11,7 @@ export class TblCreateMessage1766396293832 implements MigrationInterface {
 
         message TEXT NOT NULL,
         is_read BOOLEAN DEFAULT FALSE,
+        is_edited BOOLEAN DEFAULT FALSE,
         
         -- New status column (Sent, Delivered, Seen)
         status VARCHAR(10) NOT NULL DEFAULT 'sent',

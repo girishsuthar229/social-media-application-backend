@@ -17,9 +17,12 @@ import {
 import { MessageService } from 'src/module/message/message.service';
 import { NewUserNotification } from 'src/module/users/interface/users.interface';
 
+import * as dotenv from 'dotenv';
+dotenv.config();
 @WebSocketGateway({
   cors: {
-    origin: '*',
+    origin: [process.env.FRONTEND_HOST, 'http://localhost:3001'],
+    credentials: true,
   },
 })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {

@@ -2,7 +2,6 @@ import { BaseEntity } from 'src/database/entities/base.entity';
 import { Entity, Column, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { Roles } from '../../roles/entity/role.entity';
 import { Follows } from 'src/module/follows/entity/follow.entity';
-import { SavedPostEntity } from 'src/module/saved_posts/entity/saved_posts.entity';
 import { CreatePost } from 'src/module/posts/entity/post.entity';
 
 @Entity('users')

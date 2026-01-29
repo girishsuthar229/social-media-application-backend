@@ -28,6 +28,7 @@ export interface UserMessageListModel {
   modified_date?: string;
   status: string;
   is_read: boolean;
+  is_edited?: boolean;
   sender: {
     id: number;
     user_name: string;

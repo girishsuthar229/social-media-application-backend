@@ -1,4 +1,3 @@
-import { BaseEntity } from 'src/database/entities/base.entity';
 import { CreatePost } from 'src/module/posts/entity/post.entity';
 import { Users } from 'src/module/users/entity/user.entity';
 import {
