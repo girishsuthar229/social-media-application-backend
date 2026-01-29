@@ -21,8 +21,7 @@ import * as dotenv from 'dotenv';
 dotenv.config();
 @WebSocketGateway({
   cors: {
-    origin: [process.env.FRONTEND_HOST, 'http://localhost:3001'],
-    credentials: true,
+    origin: '*',
   },
 })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
