@@ -317,21 +317,29 @@ export class MessageService {
     return { count: total, rows };
   }
 
-  async getUnReadMessageUsers(
-    currentUserId: number,
-  ): Promise<{ totalCount: number }> {
+  async getUnReadMessageUsers(currentUserId: number): Promise<{
+    totalUsersCount: number;
+    users: { m_sender_id: number; eachUserMsgCount: string }[];
+  }> {
     const queryBuilder = this.messageRepository
       .createQueryBuilder('m')
       .where('m.receiver_id = :currentUserId', { currentUserId })
       .andWhere('m.is_read = :isRead', { isRead: false })
       .andWhere('m.status != :status', { status: MessageStatus.SEEN })
       .andWhere('m.deleted_date IS NULL')
-      .select('DISTINCT m.sender_id');
+      .select('m.sender_id')
+      .addSelect('COUNT(m.id)', 'eachUserMsgCount')
+      .groupBy('m.sender_id');
 
-    const messages = await queryBuilder.getRawMany();
-    const distinctSenderCount = messages.length;
+    const unreadMessageUsers: {
+      m_sender_id: number;
+      eachUserMsgCount: string;
+    }[] = await queryBuilder.getRawMany();
 
-    return { totalCount: distinctSenderCount };
+    return {
+      totalUsersCount: unreadMessageUsers.length,
+      users: unreadMessageUsers,
+    };
   }
 
   async updateMessage(
